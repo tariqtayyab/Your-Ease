@@ -1,3 +1,112 @@
 @tailwind base;
                      @tailwind components;
                      @tailwind utilities;
+
+                     @keyframes slide {
+  0% {
+    transform: translateX(0%);
+  }
+  33% {
+    transform: translateX(-100%);
+  }
+  66% {
+    transform: translateX(-200%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-slide {
+  animation: slide 12s infinite ease-in-out;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Add these styles to your CSS file or use Tailwind with JIT mode */
+
+/* Custom colors */
+.text-coral-500 {
+  color: #ff7e67;
+}
+
+.bg-coral-500 {
+  background-color: #ff7e67;
+}
+
+.text-teal-600 {
+  color: #2c9ba3;
+}
+
+.bg-teal-600 {
+  background-color: #2c9ba3;
+}
+
+.hover\:bg-teal-700:hover {
+  background-color: #25858c;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Line clamp utility for text truncation */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Smooth transitions */
+.product-card {
+  transition: all 0.3s ease;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible {
+  outline: 2px solid #2c9ba3;
+  outline-offset: 2px;
+}
+
+/* Add to your global CSS */
+.hero-section {
+  position: relative;
+  z-index: 10;
+}
+
+.footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure proper stacking context */
+body {
+  position: relative;
+}
+
+main {
+  position: relative;
+  z-index: 2;
+}
+
+footer {
+  position: relative;
+  z-index: 1;
+}
