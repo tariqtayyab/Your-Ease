@@ -17,7 +17,7 @@ import Search from "./pages/Search";
 import SEOHead from "./components/SEOHead";
 import { analytics } from "./utils/analytics";
 import AdminAnalytics from "./pages/AdminAnalytics";
-import GDPRConsent from './components/GDPRConsent';
+// import GDPRConsent from './components/GDPRConsent';
 import TrackOrder from "./pages/TrackOrder";
 import Shipping from "./pages/Shipping";
 import FAQ from "./pages/FAQ";
