@@ -1,30 +1,39 @@
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { useState, useEffect, useRef } from "react";
-import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX, FiClock, FiArrowLeft } from "react-icons/fi";
+import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX, FiClock, FiArrowLeft, FiChevronDown } from "react-icons/fi";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const navigate = useNavigate();
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
+  const categoriesRef = useRef(null);
+  const API_URL = import.meta.env.VITE_API_URL;
 
-  // Close search when clicking outside (desktop only)
+  // Close search and categories when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Close search dropdown
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setSearchOpen(false);
       }
+      
+      // Close categories dropdown
+      if (categoriesRef.current && !categoriesRef.current.contains(event.target)) {
+        setCategoriesOpen(false);
+      }
     };
 
-    // Only add this for desktop
     if (window.innerWidth >= 768) {
       document.addEventListener('mousedown', handleClickOutside);
     }
@@ -39,7 +48,7 @@ export default function Navbar() {
     }
   }, [searchOpen]);
 
-  // Load recent searches and products
+  // Load recent searches, products, and categories
   useEffect(() => {
     const savedSearches = localStorage.getItem('recentSearches');
     if (savedSearches) {
@@ -49,7 +58,7 @@ export default function Navbar() {
     // Fetch products for suggestions
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/products');
+        const response = await fetch(`${API_URL}/products`);
         const data = await response.json();
         setProducts(data);
       } catch (error) {
@@ -57,7 +66,19 @@ export default function Navbar() {
       }
     };
 
+    // Fetch categories for dropdown
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${API_URL}/categories`);
+        const data = await response.json();
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
     fetchProducts();
+    fetchCategories();
   }, []);
 
   // FIXED: Load cart count from localStorage
@@ -156,7 +177,24 @@ export default function Navbar() {
     setSearchOpen(!searchOpen);
     if (!searchOpen) {
       setIsOpen(false); // Close mobile menu if open
+      setCategoriesOpen(false); // Close categories if open
     }
+  };
+
+  const handleCategoriesToggle = () => {
+    setCategoriesOpen(!categoriesOpen);
+    if (!categoriesOpen) {
+      setIsOpen(false); // Close mobile menu if open
+      setSearchOpen(false); // Close search if open
+    }
+  };
+
+  const handleCategoryClick = (category) => {
+    navigate(`/category/${category._id}`, { 
+      state: { categoryName: category.name } 
+    });
+    setCategoriesOpen(false);
+    setIsOpen(false); // Close mobile menu
   };
 
   const handleBackClick = () => {
@@ -184,18 +222,43 @@ export default function Navbar() {
           {/* Center: desktop links */}
           <div className="hidden md:flex gap-8 font-medium">
             <Link to="/" className="hover:text-black">Home</Link>
-            {userInfo && userInfo.role === "admin" && (
-              <Link
-                to="/admin"
-                className="text-blue-600 font-semibold hover:text-blue-800"
+            
+            {/* Categories Dropdown */}
+            <div className="relative" ref={categoriesRef}>
+              <button
+                onClick={handleCategoriesToggle}
+                className="flex items-center gap-1 hover:text-black transition-colors"
               >
-                Admin Panel
-              </Link>
-            )}
-            <Link to="/shop" className="hover:text-black">Shop</Link>
-            <Link to="/categories" className="hover:text-black">Categories</Link>
-            <Link to="/deals" className="hover:text-black">Deals</Link>
-            <Link to="/contact" className="hover:text-black">Contact</Link>
+                Categories
+                <FiChevronDown className={`transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Categories Dropdown Menu */}
+              {categoriesOpen && categories.length > 0 && (
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl z-50">
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-800 mb-3 text-lg">All Categories</h3>
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {categories.map((category) => (
+                        <button
+                          key={category._id}
+                          onClick={() => handleCategoryClick(category)}
+                          className="w-full text-left p-3 hover:bg-gray-50 rounded-xl transition-all duration-200 border border-transparent hover:border-gray-200 flex items-center justify-between group"
+                        >
+                          <span className="text-gray-700 group-hover:text-[#2c9ba3] font-medium">
+                            {category.name}
+                          </span>
+                          <div className="w-2 h-2 bg-[#2c9ba3] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <Link to="/track-order" className="hover:text-black">Track Order</Link>
+            <Link to="/about" className="hover:text-black">Contact Us</Link>
+            <Link to="/contact" className="hover:text-black">About Us</Link>
           </div>
 
           {/* Right: icons */}
@@ -490,55 +553,73 @@ export default function Navbar() {
       )}
 
       {/* Mobile menu */}
-      {isOpen && !searchOpen && (
-        <div className="md:hidden border-t border-gray-200">
-          <div className="bg-white rounded-b-lg shadow-sm">
-            <div className="flex flex-col py-2">
-              <Link onClick={() => setIsOpen(false)} to="/" className="py-3 px-4 text-center hover:bg-gray-50">Home</Link>
-              <Link onClick={() => setIsOpen(false)} to="/shop" className="py-3 px-4 text-center hover:bg-gray-50">Shop</Link>
-              <Link onClick={() => setIsOpen(false)} to="/categories" className="py-3 px-4 text-center hover:bg-gray-50">Categories</Link>
-              <Link onClick={() => setIsOpen(false)} to="/deals" className="py-3 px-4 text-center hover:bg-gray-50">Deals</Link>
-              <Link onClick={() => setIsOpen(false)} to="/contact" className="py-3 px-4 text-center hover:bg-gray-50">Contact</Link>
-              
-              {/* Mobile Admin Panel */}
-              {userInfo && userInfo.role === "admin" && (
-                <Link 
-                  onClick={() => setIsOpen(false)} 
-                  to="/admin" 
-                  className="py-3 px-4 text-center text-blue-600 font-semibold hover:bg-blue-50"
+    {/* Mobile menu */}
+{isOpen && !searchOpen && (
+  <div className="md:hidden border-t border-gray-200">
+    <div className="bg-white rounded-b-lg shadow-sm">
+      <div className="flex flex-col py-2">
+        <Link onClick={() => setIsOpen(false)} to="/" className="py-3 px-4 hover:bg-gray-50 text-gray-700 font-medium">Home</Link>
+        
+        {/* Mobile Categories Section - Collapsible */}
+        <button
+          onClick={() => setCategoriesOpen(!categoriesOpen)}
+          className="py-3 px-4 hover:bg-gray-50 text-gray-700 font-medium flex items-center justify-between border-t border-gray-100"
+        >
+          <span>Categories</span>
+          <FiChevronDown className={`transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
+        </button>
+        
+        {/* Categories Dropdown */}
+        {categoriesOpen && (
+          <div className="bg-gray-50 border-t border-gray-100">
+            <div className="py-2 max-h-60 overflow-y-auto">
+              {categories.map((category) => (
+                <button
+                  key={category._id}
+                  onClick={() => handleCategoryClick(category)}
+                  className="w-full text-left py-3 px-6 hover:bg-gray-100 transition-colors flex items-center justify-between group"
                 >
-                  Admin Panel
-                </Link>
-              )}
-              
-              {/* Mobile Login/Logout */}
-              <div className="py-3 px-4 text-center border-t border-gray-100">
-                {userInfo ? (
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem("userInfo");
-                      localStorage.removeItem("token");
-                      localStorage.removeItem("cart");
-                      window.location.reload();
-                    }}
-                    className="text-red-500 font-semibold hover:text-red-700 w-full py-2"
-                  >
-                    Logout
-                  </button>
-                ) : (
-                  <Link
-                    onClick={() => setIsOpen(false)}
-                    to="/login"
-                    className="text-gray-600 hover:text-gray-900 font-semibold block w-full py-2"
-                  >
-                    Login
-                  </Link>
-                )}
-              </div>
+                  <span className="text-gray-700 group-hover:text-[#2c9ba3] font-medium">
+                    {category.name}
+                  </span>
+                  <div className="w-2 h-2 bg-[#2c9ba3] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+              ))}
             </div>
           </div>
+        )}
+
+        <Link onClick={() => setIsOpen(false)} to="/track-order" className="py-3 px-4 hover:bg-gray-50 text-gray-700 font-medium border-t border-gray-100">Track order</Link>
+        <Link onClick={() => setIsOpen(false)} to="/contact" className="py-3 px-4 hover:bg-gray-50 text-gray-700 font-medium border-t border-gray-100">Contact Us</Link>
+        <Link onClick={() => setIsOpen(false)} to="/about" className="py-3 px-4 hover:bg-gray-50 text-gray-700 font-medium border-t border-gray-100">About Us</Link>
+        {/* Mobile Login/Logout */}
+        <div className="py-3 px-4 text-center border-t border-gray-100">
+          {userInfo ? (
+            <button
+              onClick={() => {
+                localStorage.removeItem("userInfo");
+                localStorage.removeItem("token");
+                localStorage.removeItem("cart");
+                window.location.reload();
+              }}
+              className="text-red-500 font-semibold hover:text-red-700 w-full py-2"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              onClick={() => setIsOpen(false)}
+              to="/login"
+              className="text-gray-600 hover:text-gray-900 font-semibold block w-full py-2"
+            >
+              Login
+            </Link>
+          )}
         </div>
-      )}
+      </div>
+    </div>
+  </div>
+)}
     </nav>
   );
 }

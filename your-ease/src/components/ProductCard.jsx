@@ -1,11 +1,14 @@
-// src/components/ProductCard.jsx
+// src/components/ProductCard.jsx - UPDATED (PROFESSIONAL IMAGE HANDLING)
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Star, Truck } from "lucide-react";
 
 const ProductCard = ({ product, onAddToCart }) => {
+  const URL_BASE = import.meta.env.VITE_API_BASE_URL;
   const [imgSrc, setImgSrc] = useState(
     product?.images?.[0] || "/placeholder.png"
   );
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const imgRef = useRef(null);
   const navigate = useNavigate();
@@ -31,17 +34,17 @@ const ProductCard = ({ product, onAddToCart }) => {
 
   const handleImageError = () => {
     setImgSrc("/placeholder.png");
+    setImageLoaded(true);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
   };
 
   const handleCardClick = () => {
     if (safeProduct.id) {
       navigate(`/product/${safeProduct.id}`);
     }
-  };
-
-  const handleAddToCartClick = (e) => {
-    e.stopPropagation(); // Prevent card click when clicking add to cart
-    onAddToCart?.(safeProduct);
   };
 
   const formatPrice = (price) => {
@@ -72,8 +75,9 @@ const ProductCard = ({ product, onAddToCart }) => {
     isHotSelling: product?.isHotSelling || false,
     category: product?.category,
     brand: product?.brand,
-    rating: product?.rating,
-    reviews: product?.reviews || []
+    rating: product?.rating || 0,
+    numReviews: product?.numReviews || 0,
+    freeDelivery: product?.freeDelivery !== undefined ? product.freeDelivery : true
   };
 
   // Get proper image URL
@@ -81,11 +85,11 @@ const ProductCard = ({ product, onAddToCart }) => {
     if (!imageObj) return "/placeholder.png";
     
     if (typeof imageObj === 'string') {
-      return imageObj.startsWith('http') ? imageObj : `http://localhost:5000${imageObj}`;
+      return imageObj.startsWith('http') ? imageObj : `${URL_BASE}${imageObj}`;
     }
     
     if (imageObj.url) {
-      return imageObj.url.startsWith('http') ? imageObj.url : `http://localhost:5000${imageObj.url}`;
+      return imageObj.url.startsWith('http') ? imageObj.url : `${URL_BASE}${imageObj.url}`;
     }
     
     return "/placeholder.png";
@@ -99,25 +103,48 @@ const ProductCard = ({ product, onAddToCart }) => {
       aria-label={`Product: ${safeProduct.title}`}
       onClick={handleCardClick}
     >
-      {/* Image Container */}
+      {/* Professional Image Container with Fixed Aspect Ratio */}
       <div 
         ref={imgRef}
-        className="w-full h-40 bg-gray-50 flex items-center justify-center overflow-hidden relative"
+        className="w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden relative"
       >
         {isInView ? (
           <>
+            {/* Loading Skeleton */}
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                <svg className="w-10 h-10 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 1.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM0 10a10 10 0 1110 10A10 10 0 010 10z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M10 5a1 1 0 00-1 1v4a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+            )}
+            
+            {/* Main Product Image - Professional Handling */}
             <img 
               src={imageUrl} 
               alt={safeProduct.title} 
-              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+              className={`w-full h-full object-contain transition-transform duration-500 hover:scale-105 bg-white ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               loading="lazy"
               onError={handleImageError}
+              onLoad={handleImageLoad}
             />
-            {safeProduct.isHotSelling && (
-              <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                🔥 Hot
-              </div>
+            
+            {/* Free Delivery Badge */}
+            {safeProduct.freeDelivery && (
+              <div className="absolute bottom-2 left-2">
+  <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
+    <div className="flex items-center gap-1">
+      <Truck className="w-3 h-3" />
+      <span className="text-xs font-semibold whitespace-nowrap">Free Delivery</span>
+    </div>
+  </div>
+</div>
             )}
+            
+            
           </>
         ) : (
           <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
@@ -136,55 +163,51 @@ const ProductCard = ({ product, onAddToCart }) => {
           {safeProduct.title}
         </h3>
         
-        {/* Product Description */}
-        <p className="text-xs text-gray-500 mb-3 line-clamp-2 leading-relaxed flex-1">
-          {safeProduct.description}
-        </p>
-        
-        {/* Rating */}
-        {safeProduct.rating && (
-          <div className="flex items-center mb-2">
-            <div className="flex text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} className={`w-3 h-3 ${i < Math.floor(safeProduct.rating) ? 'fill-current' : 'text-gray-300'}`} viewBox="0 0 20 20">
-                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                </svg>
-              ))}
-            </div>
-            <span className="text-xs text-gray-500 ml-1">({safeProduct.rating})</span>
-          </div>
-        )}
-        
-        {/* Price and Add to Cart */}
-        <div className="flex items-center justify-between mt-auto">
-          <div className="price-container">
-            <div className="text-teal-600 font-bold text-base">
-              {formatPrice(safeProduct.price)}
-            </div>
-            {safeProduct.oldPrice > 0 && safeProduct.oldPrice > safeProduct.price && (
-              <div className="text-xs line-through text-gray-400">
+        {/* Price */}
+        <div className="price-container mb-2">
+          <div className="text-teal-600 font-bold text-base">
+            {formatPrice(safeProduct.price)}
+            {safeProduct.oldPrice > safeProduct.price && (
+              <span className="text-gray-400 text-xs ml-2 line-through">
                 {formatPrice(safeProduct.oldPrice)}
-              </div>
+              </span>
             )}
           </div>
-          
-          <button 
-            onClick={handleAddToCartClick}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium min-w-[80px]"
-            aria-label={`Add ${safeProduct.title} to cart`}
-            disabled={safeProduct.stock === 0}
-          >
-            {safeProduct.stock === 0 ? "Out of Stock" : "Add"}
-          </button>
         </div>
         
-        {/* Stock Information */}
-        {safeProduct.stock !== undefined && (
-          <div className="mt-2 text-xs text-gray-500">
-            {safeProduct.stock > 0 
-              ? `In stock: ${safeProduct.stock}` 
-              : <span className="text-red-500 font-medium">Out of stock</span>
-            }
+        {/* Rating */}
+        {safeProduct.numReviews > 0 ? (
+          <div className="flex items-center mt-auto">
+            <span className="text-sm text-gray-700 font-medium">
+              {safeProduct.rating.toFixed(1)}
+            </span>
+            <div className="flex text-yellow-400 mx-1">
+               {[...Array(5)].map((_, i) => {
+                  const rating = product.rating || 0;
+                  const fullStars = Math.floor(rating);
+                  const hasPartialStar = rating % 1 !== 0 && i === fullStars;
+                  const partialPercentage = hasPartialStar ? (rating % 1) * 100 : 0;
+                  
+                  return (
+                    <div key={i} className="relative">
+                      <Star className="w-3 h-3 sm:w-3 sm:h-3 text-gray-300" />
+                      <div 
+                        className="absolute top-0 left-0 overflow-hidden"
+                        style={{ 
+                          width: i < fullStars ? '100%' : (hasPartialStar ? `${partialPercentage}%` : '0%')
+                        }}
+                      >
+                        <Star className="w-3 h-3 sm:w-3 sm:h-3 fill-yellow-400 text-yellow-400" />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+            <span className="text-xs text-gray-500">({safeProduct.numReviews})</span>
+          </div>
+        ) : (
+          <div className="flex items-center mt-auto text-xs text-gray-500">
+            No reviews yet
           </div>
         )}
       </div>

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Star, X, Send, Upload, Image, Video, Trash2 } from 'lucide-react';
+import { Star, X, Send, Upload, Image, Video, Trash2, LogIn } from 'lucide-react';
 import { createReview } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
-const ReviewForm = ({ productId, onSubmit, onCancel }) => {
+const ReviewForm = ({ productId, onSubmit, onCancel, user }) => {
   const [formData, setFormData] = useState({
     rating: 0,
     comment: '',
@@ -11,6 +12,48 @@ const ReviewForm = ({ productId, onSubmit, onCancel }) => {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [hoverRating, setHoverRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  // Initialize form with user's name when component mounts
+  React.useEffect(() => {
+    if (user?.name && !formData.userName) {
+      setFormData(prev => ({
+        ...prev,
+        userName: user.name
+      }));
+    }
+  }, [user?.name]); // Only run when user.name changes
+
+  // Check if user is logged in
+  if (!user) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-teal-200">
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <LogIn className="w-8 h-8 text-blue-600" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Login Required</h3>
+          <p className="text-gray-600 mb-6">
+            Please log in to submit a review and share your experience.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => navigate('/profile')}
+              className="bg-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-teal-700 transition-colors"
+            >
+              Login Now
+            </button>
+            <button
+              onClick={onCancel}
+              className="border border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,11 +62,17 @@ const ReviewForm = ({ productId, onSubmit, onCancel }) => {
       return;
     }
 
+    if (!formData.userName.trim()) {
+      alert('Please enter your name');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const reviewData = {
         ...formData,
-        media: mediaFiles
+        media: mediaFiles,
+        userName: formData.userName.trim() // Ensure we send the name
       };
       
       const newReview = await createReview(productId, reviewData);
@@ -33,7 +82,7 @@ const ReviewForm = ({ productId, onSubmit, onCancel }) => {
       setFormData({
         rating: 0,
         comment: '',
-        userName: '',
+        userName: user.name || '', // Pre-fill with user's name if available
       });
       setMediaFiles([]);
     } catch (error) {
@@ -86,15 +135,6 @@ const ReviewForm = ({ productId, onSubmit, onCancel }) => {
     setMediaFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const getFileIcon = (file) => {
-    if (file.type.startsWith('image/')) {
-      return <Image className="w-4 h-4" />;
-    } else if (file.type.startsWith('video/')) {
-      return <Video className="w-4 h-4" />;
-    }
-    return <File className="w-4 h-4" />;
-  };
-
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-teal-200">
       <div className="flex items-center justify-between mb-6">
@@ -138,7 +178,7 @@ const ReviewForm = ({ productId, onSubmit, onCancel }) => {
           </div>
         </div>
 
-        {/* Name */}
+        {/* Name - Now fully controllable */}
         <div>
           <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-2">
             Your Name *
@@ -147,12 +187,17 @@ const ReviewForm = ({ productId, onSubmit, onCancel }) => {
             type="text"
             id="userName"
             name="userName"
-            value={formData.userName}
+            value={formData.userName} // Now only uses formData.userName
             onChange={handleInputChange}
             required
             className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             placeholder="Enter your name"
           />
+          {user.name && formData.userName === user.name && (
+            <p className="text-sm text-gray-500 mt-1">
+              Using your account name. You can change it if you want.
+            </p>
+          )}
         </div>
 
         {/* Comment */}

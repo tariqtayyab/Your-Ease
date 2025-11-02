@@ -7,6 +7,11 @@ const cartItemSchema = new mongoose.Schema({
   image: String,
   price: Number,
   qty: { type: Number, default: 1 },
+  selectedOptions: {
+      type: Map,
+      of: String,
+      default: {}
+    }
 });
 
 const cartSchema = new mongoose.Schema({

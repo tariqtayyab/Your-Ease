@@ -5,6 +5,8 @@ import {
   createReview,
   updateReviewHelpful,
   deleteReview,
+  getProductReviewStats,
+  migrateProductRatings
 } from "../controllers/reviewController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -33,10 +35,11 @@ const upload = multer({
 
 // Public routes
 router.get("/products/:productId/reviews", getProductReviews);
-
+router.get('/:productId/reviews/stats', getProductReviewStats);
 // Protected routes
 router.post("/products/:productId/reviews", protect, upload.array("media", 5), createReview); // Max 5 files
 router.put("/reviews/:id/helpful", protect, updateReviewHelpful);
 router.delete("/reviews/:id", protect, deleteReview);
+router.post('/migrate-ratings', protect, admin, migrateProductRatings);
 
 export default router;

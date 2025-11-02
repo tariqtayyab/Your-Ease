@@ -1,16 +1,25 @@
-// src/components/CategoriesSection.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ProductCard from "./ProductCard";
+import { Link } from "react-router-dom";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 const CategoriesSection = ({ products = [], onAddToCart }) => {
   const [categories, setCategories] = useState([]);
-  const [visibleRows, setVisibleRows] = useState({});
   const [loading, setLoading] = useState(true);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  // Fetch categories on component mount
+  // Move window resize listener to the top - ALWAYS CALL HOOKS IN THE SAME ORDER
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     async function fetchCategories() {
       try {
@@ -25,9 +34,58 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
     fetchCategories();
   }, []);
 
-  // Group products by category ID and map to category data
+  // Function to get products to display based on category type and screen size
+  const getProductsToDisplay = (category) => {
+    if (category.isTrending) {
+      // Trending categories: 6 products on mobile, 12 on desktop (2 rows of 6)
+      return windowWidth < 768 
+        ? category.products.slice(0, 6)
+        : category.products.slice(0, 12);
+    } else {
+      // Other categories: 4 products on mobile, 8 on desktop
+      return windowWidth < 768 
+        ? category.products.slice(0, 4)
+        : category.products.slice(0, 8);
+    }
+  };
+
+  // Loading state - show skeleton
+  if (loading) {
+    return (
+      <section className="bg-gradient-to-br from-gray-50 to-blue-50 py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="space-y-16">
+            {[...Array(2)].map((_, categoryIndex) => (
+              <div key={categoryIndex} className="category-section bg-white rounded-3xl shadow-lg px-3 py-6 md:p-8 border border-gray-100 animate-pulse">
+                {/* Category Header Skeleton */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10 gap-4">
+                  <div className="text-center sm:text-left">
+                    <div className="h-8 md:h-10 bg-gray-300 rounded-lg w-48 md:w-64 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-32"></div>
+                  </div>
+                  <div className="h-12 bg-gray-300 rounded-xl w-32"></div>
+                </div>
+
+                {/* Products Grid Skeleton */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+                  {[...Array(6)].map((_, productIndex) => (
+                    <div key={productIndex} className="animate-pulse">
+                      <div className="bg-gray-300 rounded-2xl h-48 md:h-56 mb-3"></div>
+                      <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                      <div className="h-8 bg-gray-300 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   const categoriesWithProducts = categories.reduce((acc, category) => {
-    // Find products that belong to this category
     const categoryProducts = products.filter(product => 
       product.category === category._id || 
       (typeof product.category === 'object' && product.category._id === category._id)
@@ -48,59 +106,21 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
 
   // Convert to array and sort: trending first, then by position, then by name
   const sortedCategories = Object.values(categoriesWithProducts).sort((a, b) => {
-    // Trending categories first
     if (a.isTrending && !b.isTrending) return -1;
     if (!a.isTrending && b.isTrending) return 1;
-    
-    // Then by position (lower number first)
     if (a.position !== b.position) return a.position - b.position;
-    
-    // Then by name
     return a.name.localeCompare(b.name);
   });
 
-  // Initialize visible rows (3 rows by default)
-  useEffect(() => {
-    if (sortedCategories.length > 0 && Object.keys(visibleRows).length === 0) {
-      const initialVisibleRows = {};
-      sortedCategories.forEach(category => {
-        initialVisibleRows[category.id] = 3; // Show 3 rows by default
-      });
-      setVisibleRows(initialVisibleRows);
-    }
-  }, [sortedCategories.length]);
-
-  const loadMoreProducts = (categoryId) => {
-    setVisibleRows(prev => ({
-      ...prev,
-      [categoryId]: (prev[categoryId] || 3) + 4 // Load 4 more rows
-    }));
-  };
-
-  const getVisibleProducts = (category, categoryId) => {
-    const rowsToShow = visibleRows[categoryId] || 3;
-    const productsPerRow = 6; // 6 products per row on desktop
-    return category.products.slice(0, rowsToShow * productsPerRow);
-  };
-
-  const hasMoreProducts = (category, categoryId) => {
-    const rowsToShow = visibleRows[categoryId] || 3;
-    const productsPerRow = 6;
-    return category.products.length > rowsToShow * productsPerRow;
-  };
-
-  if (loading) {
-    return (
-      <section className="bg-white py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="w-8 h-8 border-4 border-[#2c9ba3] border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-500 mt-4">Loading categories...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Sort products within each category by position
+  sortedCategories.forEach(category => {
+    category.products.sort((a, b) => {
+      // Sort by position first (lower number comes first)
+      if (a.position !== b.position) return a.position - b.position;
+      // If positions are equal, sort by creation date (newest first)
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  });
 
   if (sortedCategories.length === 0) {
     return (
@@ -123,43 +143,37 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
   return (
     <section className="bg-gradient-to-br from-gray-50 to-blue-50 py-12 md:py-16">
       <div className="container mx-auto px-4">
-        {/* Section Header */}
-
-        {/* Categories */}
         <div className="space-y-16">
           {sortedCategories.map((category) => {
-            const visibleProducts = getVisibleProducts(category, category.id);
-            const showMoreButton = hasMoreProducts(category, category.id);
+            const productsToDisplay = getProductsToDisplay(category);
 
             return (
-              <div key={category.id} className="category-section bg-white rounded-3xl shadow-lg p-6 md:p-8 border border-gray-100">
-                {/* Category Header - Enhanced */}
-                <div className="text-center mb-10 relative">
-                  {/* Decorative elements */}
-                  <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#2c9ba3] to-transparent transform -translate-y-1/2"></div>
-                  
-                  <div className="relative inline-block bg-white px-6 py-3 rounded-2xl shadow-md">
+              <div key={category.id} className="category-section bg-white rounded-3xl shadow-lg px-3 py-6 md:p-8 border border-gray-100">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10 gap-4">
+                  <div className="text-center sm:text-left">
                     <h3 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-[#2c9ba3] to-[#34b4bd] bg-clip-text text-transparent mb-2">
                       {category.name}
                     </h3>
-                    
-                    {/* Category badges */}
-                    {/* <div className="flex justify-center items-center gap-3 mt-3">
-                      {category.isTrending && (
-                        <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-400 to-red-500 text-white text-sm font-semibold rounded-full shadow-md">
-                          🔥 Trending Category
-                        </span>
-                      )}
-                      <span className="inline-flex items-center px-3 py-1 bg-[#2c9ba3] text-white text-xs font-medium rounded-full">
-                        {category.products?.length || 0} Products
-                      </span>
-                    </div> */}
+                    <p className="text-gray-600 text-sm">
+                      {category.products.length} products available
+                    </p>
                   </div>
+                  
+                  {/* View All Button */}
+                  <Link
+                    to={`/category/${category.id}`}
+                    state={{ categoryName: category.name }}
+                    className="bg-gradient-to-r from-[#2c9ba3] to-[#34b4bd] hover:from-[#25838b] hover:to-[#2c9ba3] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
+                  >
+                    <span>View All</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </Link>
                 </div>
 
-                {/* Products Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-                  {visibleProducts.map((product, index) => (
+                  {productsToDisplay.map((product, index) => (
                     <ProductCard 
                       key={product._id || index} 
                       product={product} 
@@ -167,23 +181,6 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
                     />
                   ))}
                 </div>
-
-                {/* Load More Button - Enhanced */}
-                {showMoreButton && (
-                  <div className="text-center mt-10">
-                    <button
-                      onClick={() => loadMoreProducts(category.id)}
-                      className="bg-gradient-to-r from-[#2c9ba3] to-[#34b4bd] hover:from-[#25838b] hover:to-[#2c9ba3] text-white font-semibold py-4 px-10 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                    >
-                      <span className="flex items-center justify-center gap-2">
-                        📦 Load More Products 
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </span>
-                    </button>
-                  </div>
-                )}
               </div>
             );
           })}

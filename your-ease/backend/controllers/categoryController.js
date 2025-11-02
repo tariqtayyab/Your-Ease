@@ -4,9 +4,13 @@ import Product from "../models/productModel.js";
 
 // GET /api/categories
 export const getCategories = asyncHandler(async (req, res) => {
-  const categories = await Category.find({}).sort({ position: 1, createdAt: -1 }).lean(); // CHANGED: Added position sort
+  const categories = await Category.find({}).sort({ position: 1, createdAt: -1 }).lean();
   const catIds = categories.map(c => c._id);
-  const products = await Product.find({ category: { $in: catIds } }).lean();
+  
+  // CHANGED: Sort products by position, then by creation date
+  const products = await Product.find({ category: { $in: catIds } })
+    .sort({ position: 1, createdAt: -1 })
+    .lean();
 
   const map = {};
   for (const p of products) {
@@ -22,6 +26,8 @@ export const getCategories = asyncHandler(async (req, res) => {
 
   res.json(out);
 });
+
+// ... rest of your existing code remains the same ...
 
 // POST /api/categories (with file upload)
 export const createCategory = asyncHandler(async (req, res) => {

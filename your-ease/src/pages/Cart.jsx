@@ -8,17 +8,18 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
   const [localCart, setLocalCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processedCart, setProcessedCart] = useState([]);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  
   // Helper function to get image URL
   const getImageUrl = (imageObj) => {
     if (!imageObj) return "/placeholder.png";
     
     if (typeof imageObj === 'string') {
-      return imageObj.startsWith('http') ? imageObj : `http://localhost:5000${imageObj}`;
+      return imageObj.startsWith('http') ? imageObj : `${BASE_URL}${imageObj}`;
     }
     
     if (imageObj.url) {
-      return imageObj.url.startsWith('http') ? imageObj.url : `http://localhost:5000${imageObj.url}`;
+      return imageObj.url.startsWith('http') ? imageObj.url : `${BASE_URL}${imageObj.url}`;
     }
     
     return "/placeholder.png";
@@ -42,34 +43,29 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
         if (savedCart) {
           const parsedCart = JSON.parse(savedCart);
           setLocalCart(parsedCart);
-          
-          // Process the cart items immediately after loading
-          const processed = processCartItems(parsedCart);
-          setProcessedCart(processed);
         } else {
-          setProcessedCart([]);
+          setLocalCart([]);
         }
       } catch (error) {
         console.error("Error loading cart from localStorage:", error);
-        setProcessedCart([]);
+        setLocalCart([]);
       } finally {
         setIsLoading(false);
       }
     };
 
+    // FIX: Changed from loadCartFromStorage to loadCartFromLocalStorage
     loadCartFromLocalStorage();
   }, []);
 
-  // Update processedCart when localCart changes
+  // ✅ FIX: Always use localCart for processing and display
   useEffect(() => {
-    if (localCart.length > 0) {
-      const processed = processCartItems(localCart);
-      setProcessedCart(processed);
-    }
+    const processed = processCartItems(localCart);
+    setProcessedCart(processed);
   }, [localCart]);
 
-  // Use parent cart if available, otherwise use localStorage cart
-  const displayCart = (cart && cart.length > 0) ? cart : localCart;
+  // ✅ FIX: Use only localCart for all operations
+  const displayCart = localCart;
 
   // Local storage update functions
   const handleUpdateQuantity = (itemId, newQuantity) => {
@@ -79,13 +75,13 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
     }
 
     try {
-      const updatedCart = displayCart.map(item => 
+      const updatedCart = localCart.map(item => 
         (item.id === itemId || item._id === itemId) 
           ? { ...item, quantity: newQuantity }
           : item
       );
 
-      // Update localStorage
+      // Update localStorage and state
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       setLocalCart(updatedCart);
 
@@ -100,11 +96,11 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
 
   const handleRemoveFromCart = (itemId) => {
     try {
-      const updatedCart = displayCart.filter(item => 
+      const updatedCart = localCart.filter(item => 
         item.id !== itemId && item._id !== itemId
       );
 
-      // Update localStorage
+      // Update localStorage and state
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       setLocalCart(updatedCart);
 
@@ -118,8 +114,7 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
   };
 
   const handleCalculateTotal = () => {
-    // Calculate total from display cart
-    return displayCart.reduce((total, item) => {
+    return localCart.reduce((total, item) => {
       const price = item.price || item.currentPrice || 0;
       return total + (price * item.quantity);
     }, 0);
@@ -131,7 +126,27 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
   };
 
   const getTotalItems = () => {
-    return displayCart.reduce((total, item) => total + item.quantity, 0);
+    return localCart.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  // NEW: Function to display selected options
+  const renderSelectedOptions = (selectedOptions) => {
+    if (!selectedOptions || Object.keys(selectedOptions).length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="mt-2 space-y-1">
+        {Object.entries(selectedOptions).map(([optionName, value]) => (
+          <div key={optionName} className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium text-gray-700 capitalize">{optionName}:</span>
+            <span className="bg-gray-100 px-2 py-1 rounded-md border border-gray-200">
+              {value}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   // Show loading state while cart is being loaded
@@ -143,7 +158,7 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
     );
   }
 
-  if (displayCart.length === 0) {
+  if (localCart.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-8 pb-24">
         <div className="container mx-auto px-4">
@@ -224,6 +239,10 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
                       <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2 line-clamp-2">
                         {item.title}
                       </h3>
+                      
+                      {/* NEW: Display Selected Options */}
+                      {renderSelectedOptions(item.selectedOptions)}
+                      
                       <p className="text-xl sm:text-2xl font-bold text-teal-600 mb-3 sm:mb-4">
                         {formatPrice(item.price || item.currentPrice)}
                       </p>

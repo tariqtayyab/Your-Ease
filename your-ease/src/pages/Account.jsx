@@ -1,3 +1,4 @@
+// src/pages/Account.jsx
 import React, { useState, useEffect } from "react";
 import { 
   loginUser, 
@@ -7,11 +8,9 @@ import {
   getUserOrders,
   getWishlist,
   getAddresses,
-  getPaymentMethods,
   addToWishlist,
   removeFromWishlist,
   addAddress,
-  updateAddress,
   deleteAddress,
   setDefaultAddress
 } from "../api";
@@ -21,7 +20,6 @@ import {
   ShoppingBag, 
   Heart, 
   MapPin, 
-  CreditCard, 
   Settings, 
   LogOut, 
   Edit3,
@@ -38,8 +36,22 @@ import {
   Eye,
   Home,
   Building,
-  Navigation
+  Navigation,
+  BarChart3,
+  Image,
+  List,
+  RefreshCw,
+  Calendar,
+  Tag
 } from "lucide-react";
+
+// Import the proper OrderManagement component
+import OrderManagement from "../components/OrderManagement";
+
+// Import your admin components
+import AnalyticsDashboard from "../components/AnalyticsDashboard";
+import BannerAdmin from "../pages/admin/BannerAdmin";
+import CategoriesAdmin from "../pages/admin/CategoriesAdmin";
 
 // Loading Spinner Component
 const LoadingSpinner = ({ size = "medium" }) => {
@@ -54,7 +66,7 @@ const LoadingSpinner = ({ size = "medium" }) => {
   );
 };
 
-// Address Form Component - MOVED OUTSIDE
+// Address Form Component
 const AddressForm = ({ 
   showAddressForm, 
   setShowAddressForm, 
@@ -236,7 +248,6 @@ const Account = () => {
   const [orders, setOrders] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [addresses, setAddresses] = useState([]);
-  const [paymentMethods, setPaymentMethods] = useState([]);
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -261,8 +272,7 @@ const Account = () => {
     dashboard: false,
     orders: false,
     wishlist: false,
-    addresses: false,
-    payments: false
+    addresses: false
   });
 
   const navigate = useNavigate();
@@ -290,16 +300,13 @@ const Account = () => {
           loadDashboardData();
           break;
         case "orders":
-          loadOrders();
+          if (!user.isAdmin) loadOrders();
           break;
         case "wishlist":
-          loadWishlist();
+          if (!user.isAdmin) loadWishlist();
           break;
         case "addresses":
           loadAddresses();
-          break;
-        case "payments":
-          loadPaymentMethods();
           break;
         default:
           break;
@@ -363,19 +370,6 @@ const Account = () => {
     }
   };
 
-  const loadPaymentMethods = async () => {
-    setLoadingState('payments', true);
-    try {
-      const data = await getPaymentMethods();
-      setPaymentMethods(data.paymentMethods || data || []);
-    } catch (error) {
-      console.error("Error loading payment methods:", error);
-      setPaymentMethods([]);
-    } finally {
-      setLoadingState('payments', false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -391,6 +385,8 @@ const Account = () => {
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userInfo", JSON.stringify(data));
+        console.log(data.token);
+        
         setUser(data);
         setProfileData({
           name: data.name || "",
@@ -417,7 +413,6 @@ const Account = () => {
     setOrders([]);
     setWishlist([]);
     setAddresses([]);
-    setPaymentMethods([]);
   };
 
   const handleProfileUpdate = async (e) => {
@@ -460,7 +455,6 @@ const Account = () => {
     setAddressLoading(true);
     
     try {
-      // Prepare the address data in the correct format
       const addressData = {
         fullName: addressForm.fullName,
         phone: addressForm.phone,
@@ -519,25 +513,28 @@ const Account = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'delivered': return 'text-green-600 bg-green-50';
-      case 'shipped': return 'text-blue-600 bg-blue-50';
-      case 'processing': return 'text-yellow-600 bg-yellow-50';
-      case 'cancelled': return 'text-red-600 bg-red-50';
-      case 'pending': return 'text-gray-600 bg-gray-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
+  const colors = {
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    confirmed: 'bg-blue-100 text-blue-800 border-blue-200',
+    processing: 'bg-purple-100 text-purple-800 border-purple-200',
+    shipped: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    delivered: 'bg-green-100 text-green-800 border-green-200',
+    cancelled: 'bg-red-100 text-red-800 border-red-200'
   };
+  return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+};
 
   const getStatusIcon = (status) => {
-    switch (status) {
-      case 'delivered': return <CheckCircle className="w-4 h-4" />;
-      case 'shipped': return <Truck className="w-4 h-4" />;
-      case 'processing': return <Package className="w-4 h-4" />;
-      case 'cancelled': return <XCircle className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
-    }
+  const icons = {
+    pending: <Clock className="w-4 h-4" />,
+    confirmed: <CheckCircle className="w-4 h-4" />,
+    processing: <RefreshCw className="w-4 h-4" />,
+    shipped: <Truck className="w-4 h-4" />,
+    delivered: <CheckCircle className="w-4 h-4" />,
+    cancelled: <XCircle className="w-4 h-4" />
   };
+  return icons[status];
+};
 
   const getAddressIcon = (type) => {
     switch (type) {
@@ -559,7 +556,6 @@ const Account = () => {
     return `Rs ${parseFloat(price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
   };
 
-  // Fixed input handler functions - using proper event handling
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -576,6 +572,27 @@ const Account = () => {
       ...prev, 
       [name]: type === 'checkbox' ? checked : value 
     }));
+  };
+
+  // Navigation items based on user role
+  const getNavigationItems = () => {
+    const userItems = [
+      { id: "dashboard", label: "Dashboard", icon: User },
+      { id: "orders", label: "My Orders", icon: ShoppingBag },
+      { id: "wishlist", label: "Wishlist", icon: Heart },
+      { id: "addresses", label: "Addresses", icon: MapPin },
+      { id: "settings", label: "Account Settings", icon: Settings },
+    ];
+
+    const adminItems = [
+      { id: "dashboard", label: "Analytics", icon: BarChart3 },
+      { id: "orders", label: "Order Management", icon: ShoppingBag },
+      { id: "banners", label: "Banner Management", icon: Image },
+      { id: "categories", label: "Category Management", icon: List },
+      { id: "settings", label: "Account Settings", icon: Settings },
+    ];
+
+    return user?.isAdmin ? adminItems : userItems;
   };
 
   if (!user) {
@@ -709,19 +726,14 @@ const Account = () => {
                   <User className="w-8 h-8 text-teal-600" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user.name}!</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Welcome back, {user.name}!
+                    {user.isAdmin && <span className="ml-2 text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Admin</span>}
+                  </h1>
                   <p className="text-gray-600">{user.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {user.isAdmin && (
-                  <button
-                    onClick={() => navigate("/admin")}
-                    className="bg-green-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-green-700 transition-colors text-sm"
-                  >
-                    Admin Panel
-                  </button>
-                )}
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-2 text-red-600 hover:text-red-700 transition-colors text-sm font-semibold"
@@ -738,14 +750,7 @@ const Account = () => {
             <div className="lg:w-1/4">
               <div className="bg-white rounded-2xl shadow-sm p-4 sticky top-8">
                 <nav className="space-y-2">
-                  {[
-                    { id: "dashboard", label: "Dashboard", icon: User },
-                    { id: "orders", label: "My Orders", icon: ShoppingBag },
-                    { id: "wishlist", label: "Wishlist", icon: Heart },
-                    { id: "addresses", label: "Addresses", icon: MapPin },
-                    { id: "payments", label: "Payment Methods", icon: CreditCard },
-                    { id: "settings", label: "Account Settings", icon: Settings },
-                  ].map((item) => (
+                  {getNavigationItems().map((item) => (
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
@@ -765,149 +770,234 @@ const Account = () => {
 
             {/* Main Content */}
             <div className="lg:w-3/4">
-              {/* Dashboard Tab */}
+              {/* Dashboard Tab - Different for Admin vs User */}
               {activeTab === "dashboard" && (
                 <div className="space-y-6">
-                  {dataLoading.dashboard ? (
-                    <div className="bg-white rounded-2xl shadow-sm p-12 flex items-center justify-center">
-                      <div className="text-center">
-                        <LoadingSpinner size="large" />
-                        <p className="mt-3 text-gray-600">Loading dashboard...</p>
-                      </div>
-                    </div>
+                  {user.isAdmin ? (
+                    // Admin Analytics Dashboard
+                    <AnalyticsDashboard />
                   ) : (
+                    // User Dashboard
                     <>
-                      {/* Quick Stats */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
-                          <ShoppingBag className="w-8 h-8 text-teal-600 mx-auto mb-2" />
-                          <div className="text-2xl font-bold text-gray-900">
-                            {dashboardData?.stats?.totalOrders || 0}
+                      {dataLoading.dashboard ? (
+                        <div className="bg-white rounded-2xl shadow-sm p-12 flex items-center justify-center">
+                          <div className="text-center">
+                            <LoadingSpinner size="large" />
+                            <p className="mt-3 text-gray-600">Loading dashboard...</p>
                           </div>
-                          <div className="text-sm text-gray-600">Total Orders</div>
                         </div>
-                        <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
-                          <Heart className="w-8 h-8 text-red-500 mx-auto mb-2" />
-                          <div className="text-2xl font-bold text-gray-900">
-                            {dashboardData?.stats?.wishlistCount || 0}
-                          </div>
-                          <div className="text-sm text-gray-600">Wishlist Items</div>
-                        </div>
-                        <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
-                          <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                          <div className="text-2xl font-bold text-gray-900">
-                            {dashboardData?.stats?.loyaltyPoints || 0}
-                          </div>
-                          <div className="text-sm text-gray-600">Loyalty Points</div>
-                        </div>
-                        <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
-                          <Package className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                          <div className="text-2xl font-bold text-gray-900">
-                            {dashboardData?.stats?.pendingOrders || 0}
-                          </div>
-                          <div className="text-sm text-gray-600">Processing</div>
-                        </div>
-                      </div>
-
-                      {/* Recent Orders */}
-                      <div className="bg-white rounded-2xl shadow-sm p-6">
-                        <div className="flex items-center justify-between mb-6">
-                          <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
-                          <button 
-                            onClick={() => setActiveTab("orders")}
-                            className="text-teal-600 hover:text-teal-700 font-semibold text-sm"
-                          >
-                            View All
-                          </button>
-                        </div>
-                        <div className="space-y-4">
-                          {dashboardData?.recentOrders?.length > 0 ? (
-                            dashboardData.recentOrders.slice(0, 3).map((order) => (
-                              <div key={order._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
-                                <div>
-                                  <div className="font-semibold text-gray-900">Order #{order._id.slice(-6)}</div>
-                                  <div className="text-sm text-gray-600">{formatDate(order.createdAt)}</div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="font-bold text-gray-900">{formatPrice(order.totalPrice)}</div>
-                                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus)}`}>
-                                    {getStatusIcon(order.orderStatus)}
-                                    {order.orderStatus}
-                                  </div>
-                                </div>
+                      ) : (
+                        <>
+                          {/* Quick Stats */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
+                              <ShoppingBag className="w-8 h-8 text-teal-600 mx-auto mb-2" />
+                              <div className="text-2xl font-bold text-gray-900">
+                                {dashboardData?.stats?.totalOrders || 0}
                               </div>
-                            ))
-                          ) : (
-                            <p className="text-gray-500 text-center py-4">No recent orders</p>
-                          )}
-                        </div>
-                      </div>
+                              <div className="text-sm text-gray-600">Total Orders</div>
+                            </div>
+                            <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
+                              <Heart className="w-8 h-8 text-red-500 mx-auto mb-2" />
+                              <div className="text-2xl font-bold text-gray-900">
+                                {dashboardData?.stats?.wishlistCount || 0}
+                              </div>
+                              <div className="text-sm text-gray-600">Wishlist Items</div>
+                            </div>
+                            <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
+                              <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+                              <div className="text-2xl font-bold text-gray-900">
+                                {dashboardData?.stats?.loyaltyPoints || 0}
+                              </div>
+                              <div className="text-sm text-gray-600">Loyalty Points</div>
+                            </div>
+                            <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
+                              <Package className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                              <div className="text-2xl font-bold text-gray-900">
+                                {dashboardData?.stats?.pendingOrders || 0}
+                              </div>
+                              <div className="text-sm text-gray-600">Processing</div>
+                            </div>
+                          </div>
+
+                          {/* Recent Orders */}
+                            {/* Recent Orders */}
+<div className="bg-white rounded-2xl shadow-sm p-6">
+  <div className="flex items-center justify-between mb-6">
+    <div>
+      <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
+      <p className="text-sm text-gray-600 mt-1">Your latest purchases</p>
+    </div>
+    <button 
+      onClick={() => setActiveTab("orders")}
+      className="flex items-center gap-2 text-teal-600 hover:text-teal-700 font-semibold text-sm transition-colors group"
+    >
+      View All
+      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+  
+  <div className="space-y-3">
+    {dataLoading.orders ? (
+      <div className="flex items-center justify-center py-8">
+        <LoadingSpinner size="medium" />
+        <span className="ml-3 text-gray-600">Loading orders...</span>
+      </div>
+    ) : orders.length > 0 ? (
+      orders.slice(0, 3).map((order) => (
+        <div 
+          key={order._id} 
+          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-teal-50 transition-colors cursor-pointer group"
+          onClick={() => setActiveTab("orders")}
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white rounded-lg border border-gray-200 flex items-center justify-center group-hover:border-teal-200 transition-colors">
+              <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-teal-600 transition-colors" />
+            </div>
+            <div>
+              <div className="font-semibold text-gray-900 group-hover:text-teal-900 transition-colors">
+                {order.orderNumber || 'Order'}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                <Calendar className="w-3 h-3" />
+                <span>{formatDate(order.createdAt)}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-right">
+            <div className="font-bold text-gray-900 text-lg mb-1">{formatPrice(order.totalPrice)}</div>
+            <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus)} group-hover:shadow-sm transition-shadow`}>
+              {getStatusIcon(order.orderStatus)}
+              <span className="capitalize">{order.orderStatus}</span>
+            </div>
+          </div>
+        </div>
+      ))
+    ) : (
+      <div className="text-center py-8">
+        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <ShoppingBag className="w-6 h-6 text-gray-400" />
+        </div>
+        <p className="text-gray-500 text-sm">No recent orders</p>
+        <p className="text-gray-400 text-xs mt-1">Your orders will appear here</p>
+      </div>
+    )}
+  </div>
+</div>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
               )}
 
-              {/* Orders Tab */}
-              {activeTab === "orders" && (
-                <div className="bg-white rounded-2xl shadow-sm p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-6">Order History</h2>
-                  {dataLoading.orders ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="text-center">
-                        <LoadingSpinner size="large" />
-                        <p className="mt-3 text-gray-600">Loading orders...</p>
+              {/* Orders Tab - Different for Admin vs User */}
+             
+{activeTab === "orders" && (
+  <div className="space-y-6">
+    {user.isAdmin ? (
+      <OrderManagement />
+    ) : (
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">My Orders</h2>
+          <span className="text-gray-600">{orders.length} orders</span>
+        </div>
+        
+        {dataLoading.orders ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <LoadingSpinner size="large" />
+              <p className="mt-3 text-gray-600">Loading your orders...</p>
+            </div>
+          </div>
+        ) : orders.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {orders.map((order) => (
+              <div key={order._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow">
+                {/* Order Header - Minimal */}
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.orderStatus)}`}>
+                      {getStatusIcon(order.orderStatus)}
+                      <span className="capitalize">{order.orderStatus}</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{formatDate(order.createdAt)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-lg text-gray-900">{formatPrice(order.totalPrice)}</p>
+                    <p className="text-sm text-gray-500 capitalize">{order.paymentMethod}</p>
+                  </div>
+                </div>
+
+                {/* Order Items - Clean & Clickable */}
+                <div className="space-y-3">
+                  {order.orderItems?.map((item, index) => (
+                    <div 
+                      key={index} 
+                      onClick={() => navigate(`/product/${item.product}`)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
+                      <img 
+                        src={item.image || '/placeholder.png'} 
+                        alt={item.name}
+                        className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
+                        onError={(e) => {
+                          e.target.src = "/placeholder.png";
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-1">
+                          {item.name}
+                        </h3>
+                        <div className="flex items-center gap-4 text-xs text-gray-600">
+                          <span>Qty: {item.qty}</span>
+                          <span>•</span>
+                          <span>{formatPrice(item.price)} each</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900 text-sm">
+                          {formatPrice(item.price * item.qty)}
+                        </p>
                       </div>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {orders.length > 0 ? (
-                        orders.map((order) => (
-                          <div key={order._id} className="border border-gray-200 rounded-xl p-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
-                              <div>
-                                <div className="font-semibold text-gray-900">Order #{order._id.slice(-6)}</div>
-                                <div className="text-sm text-gray-600">Placed on {formatDate(order.createdAt)}</div>
-                              </div>
-                              <div className="text-right mt-2 sm:mt-0">
-                                <div className="font-bold text-gray-900">{formatPrice(order.totalPrice)}</div>
-                                <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus)}`}>
-                                  {getStatusIcon(order.orderStatus)}
-                                  {order.orderStatus}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <div className="text-sm text-gray-600">{order.orderItems?.length || 0} items</div>
-                              <button 
-                                onClick={() => navigate(`/orders/${order._id}`)}
-                                className="flex items-center gap-1 text-teal-600 hover:text-teal-700 font-semibold text-sm"
-                              >
-                                <Eye className="w-4 h-4" />
-                                View Details
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-8">
-                          <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Orders Yet</h3>
-                          <p className="text-gray-600 mb-4">Start shopping to see your orders here</p>
-                          <button
-                            onClick={() => navigate('/')}
-                            className="bg-teal-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-teal-700 transition-colors"
-                          >
-                            Start Shopping
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  ))}
                 </div>
-              )}
 
-              {/* Wishlist Tab */}
-              {activeTab === "wishlist" && (
+                {/* Order Summary - Minimal */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex justify-between items-center text-sm text-gray-600">
+                    <span>{order.orderItems?.length || 0} items</span>
+                    <span>Total: {formatPrice(order.totalPrice)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Orders Yet</h3>
+            <p className="text-gray-600 mb-4">Start shopping to see your orders here</p>
+            <button
+              onClick={() => navigate('/')}
+              className="bg-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-teal-700 transition-colors"
+            >
+              Start Shopping
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
+
+              {/* Wishlist Tab - Only for Users */}
+              {activeTab === "wishlist" && !user.isAdmin && (
                 <div className="bg-white rounded-2xl shadow-sm p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-gray-900">My Wishlist</h2>
@@ -973,7 +1063,7 @@ const Account = () => {
                 </div>
               )}
 
-              {/* Addresses Tab */}
+              {/* Addresses Tab - For both Admin and Users */}
               {activeTab === "addresses" && (
                 <div className="bg-white rounded-2xl shadow-sm p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -1058,85 +1148,22 @@ const Account = () => {
                 </div>
               )}
 
-              {/* Payments Tab */}
-              {activeTab === "payments" && (
+              {/* Admin Tabs */}
+              {activeTab === "banners" && user.isAdmin && (
                 <div className="bg-white rounded-2xl shadow-sm p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-gray-900">Payment Methods</h2>
-                    <button className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-teal-700 transition-colors">
-                      <Plus className="w-4 h-4" />
-                      Add Payment Method
-                    </button>
-                  </div>
-                  
-                  {dataLoading.payments ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="text-center">
-                        <LoadingSpinner size="large" />
-                        <p className="mt-3 text-gray-600">Loading payment methods...</p>
-                      </div>
-                    </div>
-                  ) : paymentMethods.length > 0 ? (
-                    <div className="space-y-4">
-                      {paymentMethods.map((payment) => (
-                        <div key={payment._id} className="border border-gray-200 rounded-xl p-4">
-                          <div className="flex justify-between items-start mb-3">
-                            <div className="flex items-center gap-3">
-                              <CreditCard className="w-6 h-6 text-gray-600" />
-                              <div>
-                                <p className="font-semibold text-gray-900 capitalize">{payment.methodType}</p>
-                                {payment.isDefault && (
-                                  <span className="inline-block px-2 py-1 bg-teal-100 text-teal-800 rounded-full text-xs font-medium">
-                                    Default
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              {!payment.isDefault && (
-                                <button className="text-teal-600 hover:text-teal-700 text-sm font-medium">
-                                  Set Default
-                                </button>
-                              )}
-                              <button className="text-red-600 hover:text-red-700">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                          {payment.methodType === 'card' && payment.card && (
-                            <div className="text-gray-600">
-                              <p>**** **** **** {payment.card.last4}</p>
-                              <p>{payment.card.brand} • Expires {payment.card.expiryMonth}/{payment.card.expiryYear}</p>
-                            </div>
-                          )}
-                          {payment.methodType === 'bank' && payment.bank && (
-                            <div className="text-gray-600">
-                              <p>{payment.bank.bankName}</p>
-                              <p>Account: ****{payment.bank.accountNumber.slice(-4)}</p>
-                            </div>
-                          )}
-                          {payment.methodType === 'wallet' && payment.wallet && (
-                            <div className="text-gray-600 capitalize">
-                              <p>{payment.wallet} Wallet</p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <CreditCard className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Payment Methods</h3>
-                      <p className="text-gray-600 mb-6">Add payment methods for faster checkout</p>
-                      <button className="bg-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-teal-700 transition-colors">
-                        Add Payment Method
-                      </button>
-                    </div>
-                  )}
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Banner Management</h2>
+                  <BannerAdmin />
                 </div>
               )}
 
-              {/* Account Settings Tab */}
+              {activeTab === "categories" && user.isAdmin && (
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Category Management</h2>
+                  <CategoriesAdmin />
+                </div>
+              )}
+
+              {/* Account Settings Tab - For both */}
               {activeTab === "settings" && (
                 <div className="bg-white rounded-2xl shadow-sm p-6">
                   <div className="flex items-center justify-between mb-6">

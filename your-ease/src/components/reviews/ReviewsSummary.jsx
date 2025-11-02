@@ -1,19 +1,95 @@
-import React from 'react';
+// src/components/ReviewsSummary.jsx - UPDATED
+import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
+import { getProductReviewStats } from '../../api';
 
-const ReviewsSummary = ({ reviews, onAddReviewClick }) => {
-  const totalReviews = reviews.length;
-  const averageRating = totalReviews > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
-    : 0;
+const ReviewsSummary = ({ productId, reviews = [], stats, onAddReviewClick }) => {
+  // const [stats, setStats] = useState(null); // Change to null initially
+  // const [loading, setLoading] = useState(true);
 
-  // Calculate rating distribution
-  const ratingDistribution = [0, 0, 0, 0, 0]; // 1-5 stars
-  reviews.forEach(review => {
-    if (review.rating >= 1 && review.rating <= 5) {
-      ratingDistribution[5 - review.rating]++;
-    }
-  });
+  // Fetch review stats if productId is provided
+  // useEffect(() => {
+  //   const fetchStats = async () => {
+  //     setLoading(true);
+  //     try {
+  //       if (productId) {
+  //         const reviewStats = await getProductReviewStats(productId);
+  //         setStats(reviewStats);
+  //       } else {
+  //         // Calculate from provided reviews array (fallback)
+  //         const totalReviews = reviews.length;
+  //         const averageRating = totalReviews > 0 
+  //           ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+  //           : 0;
+
+  //         const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  //         reviews.forEach(review => {
+  //           if (review.rating >= 1 && review.rating <= 5) {
+  //             ratingDistribution[review.rating]++;
+  //           }
+  //         });
+
+  //         setStats({
+  //           totalReviews,
+  //           averageRating,
+  //           ratingDistribution
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching review stats:', error);
+  //       // Set default stats on error
+  //       setStats({
+  //         totalReviews: 0,
+  //         averageRating: 0,
+  //         ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  //       });
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchStats();
+  // }, [productId, reviews]);
+
+  // Show skeleton loader while loading
+  if ( !stats) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 animate-pulse">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          {/* Overall Rating Skeleton */}
+          <div className="text-center lg:text-left">
+            <div className="h-12 bg-gray-300 rounded w-20 mx-auto lg:mx-0 mb-2"></div>
+            <div className="flex items-center justify-center lg:justify-start gap-1 mb-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="w-5 h-5 bg-gray-300 rounded"></div>
+              ))}
+            </div>
+            <div className="h-4 bg-gray-300 rounded w-32 mx-auto lg:mx-0"></div>
+          </div>
+
+          {/* Rating Distribution Skeleton */}
+          <div className="flex-1 max-w-md">
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="h-4 bg-gray-300 rounded w-16"></div>
+                  <div className="flex-1 h-2 bg-gray-300 rounded"></div>
+                  <div className="h-4 bg-gray-300 rounded w-8"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Add Review Button Skeleton */}
+          <div className="text-center lg:text-right">
+            <div className="h-12 bg-gray-300 rounded w-32 mx-auto lg:mx-0"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { totalReviews, averageRating, ratingDistribution } = stats;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
@@ -24,16 +100,28 @@ const ReviewsSummary = ({ reviews, onAddReviewClick }) => {
             {averageRating.toFixed(1)}
           </div>
           <div className="flex items-center justify-center lg:justify-start gap-1 mb-2">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-5 h-5 ${
-                  i < Math.floor(averageRating)
-                    ? 'fill-yellow-400 text-yellow-400'
-                    : 'text-gray-300'
-                }`}
-              />
-            ))}
+            {[...Array(5)].map((_, i) => {
+              const fullStars = Math.floor(averageRating);
+              const hasPartialStar = averageRating % 1 !== 0 && i === fullStars;
+              const partialPercentage = hasPartialStar ? (averageRating % 1) * 100 : 0;
+              
+              return (
+                <div key={i} className="relative">
+                  {/* Gray background star */}
+                  <Star className="w-5 h-5 text-gray-300" />
+                  
+                  {/* Colored overlay */}
+                  <div 
+                    className="absolute top-0 left-0 overflow-hidden"
+                    style={{ 
+                      width: i < fullStars ? '100%' : (hasPartialStar ? `${partialPercentage}%` : '0%')
+                    }}
+                  >
+                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  </div>
+                </div>
+              );
+            })}
           </div>
           <p className="text-gray-600 text-sm">
             Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
@@ -43,8 +131,8 @@ const ReviewsSummary = ({ reviews, onAddReviewClick }) => {
         {/* Rating Distribution */}
         <div className="flex-1 max-w-md">
           <div className="space-y-2">
-            {[5, 4, 3, 2, 1].map((stars, index) => {
-              const count = ratingDistribution[index];
+            {[5, 4, 3, 2, 1].map((stars) => {
+              const count = ratingDistribution[stars] || 0;
               const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
               
               return (

@@ -5,6 +5,8 @@ const BannerAdmin = () => {
   const [imageFile, setImageFile] = useState(null);
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(false);
+  const API_BASE = import.meta.env.VITE_API_URL;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // ✅ Use consistent token source
   const getAdminToken = () => {
@@ -15,7 +17,7 @@ const BannerAdmin = () => {
   const fetchBanners = async () => {
     try {
       const token = getAdminToken();
-      const res = await axios.get("http://localhost:5000/api/banners", {
+      const res = await axios.get(`${API_BASE}/banners`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBanners(res.data);
@@ -37,7 +39,7 @@ const BannerAdmin = () => {
     const token = getAdminToken();
     
     console.log("🔄 Sending request to server...");
-    const response = await axios.post("http://localhost:5000/api/banners", formData, {
+    const response = await axios.post(`${API_BASE}/banners`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
@@ -76,7 +78,7 @@ const BannerAdmin = () => {
     if (!window.confirm("Are you sure you want to delete this banner?")) return;
     try {
       const token = getAdminToken();
-      await axios.delete(`http://localhost:5000/api/banners/${id}`, {
+      await axios.delete(`${API_BASE}/banners/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchBanners();
@@ -117,7 +119,7 @@ const BannerAdmin = () => {
             banners.map((banner) => (
               <div key={banner._id} style={styles.card}>
                 <img
-                  src={banner.image.startsWith("http") ? banner.image : `http://localhost:5000${banner.image}`}
+                  src={banner.image.startsWith("http") ? banner.image : `${API_BASE_URL}${banner.image}`}
                   alt="banner"
                   style={styles.image}
                 />

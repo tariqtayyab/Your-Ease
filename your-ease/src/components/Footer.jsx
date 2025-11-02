@@ -1,4 +1,6 @@
 import { FiFacebook, FiInstagram, FiTwitter, FiYoutube } from "react-icons/fi"
+import { Link } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 export default function Footer() {
   return (
@@ -6,7 +8,11 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Brand Info */}
         <div>
-          <h2 className="text-xl font-bold mb-4">YourEase</h2>
+          <div className="bg-white p-3 rounded-lg inline-block mb-4">
+            <Link to="/">
+              <img src={logo} alt="YourEase logo" className="w-96 md:w-32" />
+            </Link>
+          </div>
           <p className="text-sm leading-relaxed">
             Shopping made simple. Discover the best deals and quality products with ease.
           </p>
@@ -17,9 +23,8 @@ export default function Footer() {
           <h3 className="text-lg font-semibold mb-3">Quick Links</h3>
           <ul className="space-y-2 text-sm">
             <li><a href="/" className="hover:underline">Home</a></li>
-            <li><a href="/shop" className="hover:underline">Shop</a></li>
-            <li><a href="/categories" className="hover:underline">Categories</a></li>
             <li><a href="/contact" className="hover:underline">Contact</a></li>
+            <li><a href="/track-order" className="hover:underline">Track order</a></li>
           </ul>
         </div>
 
@@ -31,6 +36,8 @@ export default function Footer() {
             <li><a href="/shipping" className="hover:underline">Shipping</a></li>
             <li><a href="/returns" className="hover:underline">Returns</a></li>
             <li><a href="/support" className="hover:underline">Support</a></li>
+            <li><a href="/policy" className="hover:underline">Policy</a></li>
+            
           </ul>
         </div>
 
@@ -49,6 +56,7 @@ export default function Footer() {
       <div className="bg-[#248489] text-center py-4 text-sm">
         © {new Date().getFullYear()} YourEase. All rights reserved.
       </div>
+      <div className="h-16 w-full bg-white md:hidden"></div>
     </footer>
   )
 }

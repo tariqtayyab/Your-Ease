@@ -1,4 +1,3 @@
-// backend/routes/productRoutes.js
 import express from "express";
 import multer from "multer";
 import path from "path";
@@ -8,16 +7,15 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  updateProductPositions, // ADD THIS IMPORT
 } from "../controllers/productController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Import your existing Cloudinary configuration
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-// Cloudinary configuration for products
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
@@ -30,7 +28,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ 
   storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit
+    fileSize: 100 * 1024 * 1024,
   }
 });
 
@@ -38,9 +36,10 @@ const upload = multer({
 router.get("/", getProducts);
 router.get("/:id", getProduct);
 
-// Admin routes - USE CLOUDINARY
+// Admin routes
 router.post("/", protect, admin, upload.array("images"), createProduct);
 router.put("/:id", protect, admin, upload.array("images"), updateProduct);
 router.delete("/:id", protect, admin, deleteProduct);
+router.put("/", protect, admin, updateProductPositions); // ADD THIS NEW ROUTE
 
 export default router;

@@ -18,6 +18,7 @@ const Search = ({ onAddToCart }) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [sortBy, setSortBy] = useState("relevance");
   const [inStockOnly, setInStockOnly] = useState(false);
+  const API_BASE = import.meta.env.VITE_API_URL;
 
   const [categories, setCategories] = useState([]);
 
@@ -34,8 +35,8 @@ const Search = ({ onAddToCart }) => {
       try {
         setLoading(true);
         const [productsRes, categoriesRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/products"),
-          axios.get("http://localhost:5000/api/categories")
+          axios.get(`${API_BASE}/products`),
+          axios.get(`${API_BASE}/categories`)
         ]);
         
         setProducts(productsRes.data);

@@ -1,7 +1,8 @@
 // src/components/ReviewImporter.jsx
 import { useState } from 'react';
 
-export default function ReviewImporter({ productId, userD }) { // Add userD as prop
+export default function ReviewImporter({ productId, userD }) {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const [jsonInput, setJsonInput] = useState('');
@@ -37,7 +38,7 @@ export default function ReviewImporter({ productId, userD }) { // Add userD as p
       console.log('Making API call with token:', token ? 'Yes' : 'No');
 
       // Call your import API
-      const response = await fetch(`http://localhost:5000/api/import/reviews/${productId}`, {
+      const response = await fetch(`${API_URL}/import/reviews/${productId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,6 +91,36 @@ export default function ReviewImporter({ productId, userD }) { // Add userD as p
     setJsonInput('');
     setImportResult(null);
   };
+  
+  const updateProductRatingsAfterImport = async (productId) => {
+  try {
+    const reviews = await Review.find({ product: productId });
+    const product = await Product.findById(productId);
+    
+    if (!product) return;
+
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0 
+      ? reviews.reduce((acc, item) => acc + item.rating, 0) / totalReviews 
+      : 0;
+
+    const ratingDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    reviews.forEach(review => {
+      if (review.rating >= 1 && review.rating <= 5) {
+        ratingDistribution[review.rating]++;
+      }
+    });
+
+    product.rating = parseFloat(averageRating.toFixed(1));
+    product.numReviews = totalReviews;
+    product.ratingDistribution = ratingDistribution;
+    
+    await product.save();
+    console.log(`✅ Updated product ${productId} with ${totalReviews} imported reviews`);
+  } catch (error) {
+    console.error('Error updating product ratings after import:', error);
+  }
+};
 
   // Don't show anything if user is not admin
   if (!isAdmin) {
@@ -191,7 +222,7 @@ export default function ReviewImporter({ productId, userD }) { // Add userD as p
       )}
 
       {/* Help Text */}
-      <div className="mt-4 text-sm text-gray-600">
+      {/* <div className="mt-4 text-sm text-gray-600">
         <p><strong>How to use:</strong></p>
         <ol className="list-decimal list-inside space-y-1 mt-1">
           <li>Run your Daraz scraper to get JSON output</li>
@@ -200,7 +231,7 @@ export default function ReviewImporter({ productId, userD }) { // Add userD as p
           <li>Click "Import Reviews"</li>
           <li>Images will be automatically uploaded to your Cloudinary</li>
         </ol>
-      </div>
+      </div> */}
     </div>
   );
 }

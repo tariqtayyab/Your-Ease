@@ -1,13 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Star, Play, X, ZoomIn } from 'lucide-react';
+import { Star, Play, X, ZoomIn, Trash2 } from 'lucide-react';
 
-const ReviewItem = ({ review }) => {
+const ReviewItem = React.memo(({ review, currentUser, onDeleteReview }) => {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
   const [videoThumbnails, setVideoThumbnails] = useState({});
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Debug: Check what's in the review object
-  console.log('Review data:', review);
+  // Simulate loading for demo purposes - remove this in production
+  useEffect(() => {
+  // Set loading to false when review data is available
+  if (review) {
+    setLoading(false);
+  }
+}, [review]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -27,8 +34,6 @@ const ReviewItem = ({ review }) => {
 
   // Handle user name display
   const getDisplayName = () => {
-    console.log('User field:', review.user, 'Type:', typeof review.user);
-    
     // If user is a string and doesn't look like ObjectId (imported reviews)
     if (typeof review.user === 'string' && !review.user.match(/^[0-9a-fA-F]{24}$/)) {
       return review.user; // "Mohammad A.", "AB M.", etc.
@@ -47,6 +52,28 @@ const ReviewItem = ({ review }) => {
   const getUserInitial = () => {
     const displayName = getDisplayName();
     return displayName.charAt(0).toUpperCase();
+  };
+
+  // Check if current user is admin
+  const isAdmin = currentUser && currentUser.isAdmin === true;
+
+  // Handle delete review - FIXED: Use the passed onDeleteReview function
+  const handleDeleteReview = async () => {
+    if (!isAdmin) return;
+    
+    const confirmDelete = window.confirm('Are you sure you want to delete this review? This action cannot be undone.');
+    
+    if (confirmDelete) {
+      setIsDeleting(true);
+      try {
+        await onDeleteReview(review._id);
+      } catch (error) {
+        console.error('Error deleting review:', error);
+        alert('Failed to delete review. Please try again.');
+      } finally {
+        setIsDeleting(false);
+      }
+    }
   };
 
   const openMediaViewer = (media, index) => {
@@ -122,11 +149,64 @@ const ReviewItem = ({ review }) => {
     }
   }, [review.media, videoThumbnails]);
 
+  // Skeleton loader
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0"></div>
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="h-4 bg-gray-300 rounded w-32"></div>
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="w-3 h-3 bg-gray-300 rounded"></div>
+                ))}
+              </div>
+              <div className="h-3 bg-gray-300 rounded w-24"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Review Content Skeleton */}
+        <div className="mb-3 space-y-2">
+          <div className="h-4 bg-gray-300 rounded"></div>
+          <div className="h-4 bg-gray-300 rounded w-5/6"></div>
+          <div className="h-4 bg-gray-300 rounded w-4/6"></div>
+        </div>
+
+        {/* Media Skeleton */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {[...Array(2)].map((_, index) => (
+            <div key={index} className="w-20 h-20 bg-gray-300 rounded-lg flex-shrink-0"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 hover:border-teal-200 transition-colors">
+      <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 hover:border-teal-200 transition-colors relative">
+        {/* Admin Delete Button - FIXED: Use handleDeleteReview instead of direct API call */}
+        {isAdmin && (
+          <button
+            onClick={handleDeleteReview}
+            disabled={isDeleting}
+            className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Delete review"
+          >
+            {isDeleting ? (
+              <div className="w-4 h-4 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
+          </button>
+        )}
+
         {/* Header */}
-        <div className="flex items-start gap-3 mb-3">
+        <div className="flex items-start gap-3 mb-3 pr-8">
           <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="font-semibold text-teal-600 text-sm">
               {getUserInitial()}
@@ -231,72 +311,98 @@ const ReviewItem = ({ review }) => {
       </div>
 
       {/* Media Viewer Modal */}
-      {mediaViewerOpen && selectedMedia && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-4xl max-h-full w-full">
-            <button
-              onClick={closeMediaViewer}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors z-10"
-            >
-              <X className="w-8 h-8" />
-            </button>
+     {mediaViewerOpen && selectedMedia && (
+  <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+    <div className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+      {/* Close Button - Fixed to top right of screen with better visibility */}
+      <button
+        onClick={closeMediaViewer}
+        className="fixed top-4 right-4 text-white hover:text-gray-300 transition-colors z-50 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 backdrop-blur-sm border border-white/20"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
 
-            {review.media && review.media.length > 1 && (
-              <>
-                <button
-                  onClick={() => navigateMedia('prev')}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-10 bg-black bg-opacity-50 rounded-full p-2"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => navigateMedia('next')}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-10 bg-black bg-opacity-50 rounded-full p-2"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </>
-            )}
+      {/* Alternative Close Button - Also add one at bottom center for easy access */}
+      <button
+        onClick={closeMediaViewer}
+        className="fixed bottom-4 left-1/2 transform -translate-x-1/2 text-white hover:text-gray-300 transition-colors z-50 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full px-4 py-2 backdrop-blur-sm border border-white/20 text-sm font-medium"
+      >
+        Close
+      </button>
 
-            {review.media && review.media.length > 1 && (
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white bg-black bg-opacity-50 px-3 py-1 rounded-full text-sm">
-                {selectedMedia.index + 1} / {review.media.length}
-              </div>
-            )}
+      {review.media && review.media.length > 1 && (
+        <>
+          {/* Previous Button */}
+          <button
+            onClick={() => navigateMedia('prev')}
+            className="fixed left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-50 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 backdrop-blur-sm border border-white/20"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          {/* Next Button */}
+          <button
+            onClick={() => navigateMedia('next')}
+            className="fixed right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-50 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 backdrop-blur-sm border border-white/20"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
 
-            <div className="flex items-center justify-center h-full">
-              {selectedMedia.type === 'image' ? (
-                <img
-                  src={selectedMedia.url}
-                  alt="Review media"
-                  className="max-w-full max-h-full object-contain rounded-lg"
-                />
-              ) : (
-                <video
-                  src={selectedMedia.url}
-                  controls
-                  autoPlay
-                  className="max-w-full max-h-full object-contain rounded-lg"
-                >
-                  Your browser does not support the video tag.
-                </video>
-              )}
-            </div>
-
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-center">
-              <div className="text-sm opacity-80">
-                {selectedMedia.type === 'image' ? 'Image' : 'Video'} by {getDisplayName()}
-              </div>
-            </div>
-          </div>
+      {/* Media Counter - Fixed to top center */}
+      {review.media && review.media.length > 1 && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 text-white bg-black bg-opacity-70 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/20">
+          {selectedMedia.index + 1} / {review.media.length}
         </div>
       )}
+
+      {/* Media Content */}
+      <div className="flex items-center justify-center w-full h-full p-8">
+        {selectedMedia.type === 'image' ? (
+          <img
+            src={selectedMedia.url}
+            alt="Review media"
+            className="max-w-full max-h-full object-contain rounded-lg"
+            onClick={closeMediaViewer} // Add click on image to close
+          />
+        ) : (
+          <div className="w-full max-w-full max-h-full">
+            <video
+              src={selectedMedia.url}
+              controls
+              autoPlay
+              className="max-w-full max-h-full object-contain rounded-lg"
+            >
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        )}
+      </div>
+
+      {/* Media Info - Fixed to bottom */}
+      <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 text-white text-center bg-black bg-opacity-70 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/20">
+        <div className="text-sm opacity-90">
+          {selectedMedia.type === 'image' ? 'Image' : 'Video'} by {getDisplayName()}
+        </div>
+      </div>
+
+      {/* Click outside to close - Full screen overlay click */}
+      <div 
+        className="absolute inset-0 -z-10" 
+        onClick={closeMediaViewer}
+      />
+    </div>
+  </div>
+)}
     </>
   );
-};
+});
 
 export default ReviewItem;
