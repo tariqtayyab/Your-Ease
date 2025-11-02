@@ -30,9 +30,9 @@
   const app = express();
 
   app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  }));;
+  origin: true,  // ← Allows ALL origins temporarily
+  credentials: true,
+}));
   app.use(express.json());
 
   const __filename = fileURLToPath(import.meta.url);
