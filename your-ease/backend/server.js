@@ -30,7 +30,7 @@
   const app = express();
 
   app.use(cors({
-  origin: true,  // ← Allows ALL origins temporarily
+  origin: true,  // ← Allows ALL origins temporari
   credentials: true,
 }));
   app.use(express.json());
