@@ -199,7 +199,7 @@ function App() {
       
       <Navbar cartCount={calculateTotalItems()} />
       <WhatsAppButton />
-      <GDPRConsent />
+      {/* <GDPRConsent /> */}
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home products={products} onAddToCart={handleAddToCart} />} /> 
