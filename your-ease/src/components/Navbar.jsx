@@ -257,8 +257,8 @@ export default function Navbar() {
               )}
             </div>
             <Link to="/track-order" className="hover:text-black">Track Order</Link>
-            <Link to="/about" className="hover:text-black">Contact Us</Link>
-            <Link to="/contact" className="hover:text-black">About Us</Link>
+            <Link to="/contact" className="hover:text-black">Contact Us</Link>
+            <Link to="/about" className="hover:text-black">About Us</Link>
           </div>
 
           {/* Right: icons */}
