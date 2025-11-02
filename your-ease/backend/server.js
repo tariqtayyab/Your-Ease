@@ -80,69 +80,22 @@
 //       console.error("❌ MongoDB Connection Failed:", error);
 //       process.exit(1);
 //     });
-
-console.log("🔍 DEBUG: Starting server...");
+console.log("🚀 TEST: Server starting...");
 
 import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
-import cors from "cors";
 
 dotenv.config();
 
-console.log("🔍 DEBUG: Environment variables loaded");
-console.log("🔍 DEBUG: MONGO_URI exists:", !!process.env.MONGO_URI);
-console.log("🔍 DEBUG: PORT:", process.env.PORT);
-
 const app = express();
-
-// Allow all origins for now
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
-
 app.use(express.json());
 
-// Simple test route
 app.get("/", (req, res) => {
-  console.log("🔍 DEBUG: Root route called");
-  res.send("Your Ease backend is running");
-});
-
-app.get("/health", (req, res) => {
-  console.log("🔍 DEBUG: Health check called");
-  res.json({ status: "OK", message: "Server is running" });
-});
-
-// Error handlers
-process.on('uncaughtException', (error) => {
-  console.log("❌ UNCAUGHT EXCEPTION:", error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.log("❌ UNHANDLED REJECTION at:", promise, "reason:", reason);
-  process.exit(1);
+  res.send("TEST: Your Ease backend is running");
 });
 
 const PORT = process.env.PORT || 5000;
 
-console.log("🔍 DEBUG: Attempting MongoDB connection...");
-
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB Connected Successfully");
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`✅ Deployment successful!`);
-    });
-  })
-  .catch((error) => {
-    console.error("❌ MongoDB Connection Failed:", error.message);
-    console.log("❌ Full error:", error);
-    process.exit(1);
-  });
-
-console.log("🔍 DEBUG: Server setup complete");
+app.listen(PORT, () => {
+  console.log(`✅ TEST Server running on port ${PORT}`);
+});
