@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
 import { useState, useEffect, useRef } from "react";
 import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX, FiClock, FiArrowLeft, FiChevronDown } from "react-icons/fi";
 
@@ -19,6 +18,7 @@ export default function Navbar() {
   const searchInputRef = useRef(null);
   const categoriesRef = useRef(null);
   const API_URL = import.meta.env.VITE_API_URL;
+  const logo = "https://res.cloudinary.com/dhxydnzrx/image/upload/v1762103256/Your_Ease_png_s4csrk.png"
 
   // Close search and categories when clicking outside
   useEffect(() => {
