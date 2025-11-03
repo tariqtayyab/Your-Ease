@@ -7,7 +7,8 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  updateProductPositions, // ADD THIS IMPORT
+  updateProductPositions,
+  migrateActiveSaleField // ADD THIS IMPORT
 } from "../controllers/productController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -40,6 +41,8 @@ router.get("/:id", getProduct);
 router.post("/", protect, admin, upload.array("images"), createProduct);
 router.put("/:id", protect, admin, upload.array("images"), updateProduct);
 router.delete("/:id", protect, admin, deleteProduct);
-router.put("/", protect, admin, updateProductPositions); // ADD THIS NEW ROUTE
+router.put("/", protect, admin, updateProductPositions); 
+router.route("/migrate/active-sale")
+  .post(protect, admin, migrateActiveSaleField);
 
 export default router;

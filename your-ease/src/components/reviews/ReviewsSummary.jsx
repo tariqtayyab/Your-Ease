@@ -3,56 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { getProductReviewStats } from '../../api';
 
-const ReviewsSummary = ({ productId, reviews = [], stats, onAddReviewClick }) => {
-  // const [stats, setStats] = useState(null); // Change to null initially
-  // const [loading, setLoading] = useState(true);
+const ReviewsSummary = ({ productId, reviews = [], stats, onAddReviewClick, loading = false }) => {
+  // Only show skeleton during initial load when we have NO reviews
+  // Once we have reviews, never show skeleton again
+  const showSkeleton = loading && reviews.length === 0;
 
-  // Fetch review stats if productId is provided
-  // useEffect(() => {
-  //   const fetchStats = async () => {
-  //     setLoading(true);
-  //     try {
-  //       if (productId) {
-  //         const reviewStats = await getProductReviewStats(productId);
-  //         setStats(reviewStats);
-  //       } else {
-  //         // Calculate from provided reviews array (fallback)
-  //         const totalReviews = reviews.length;
-  //         const averageRating = totalReviews > 0 
-  //           ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
-  //           : 0;
-
-  //         const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-  //         reviews.forEach(review => {
-  //           if (review.rating >= 1 && review.rating <= 5) {
-  //             ratingDistribution[review.rating]++;
-  //           }
-  //         });
-
-  //         setStats({
-  //           totalReviews,
-  //           averageRating,
-  //           ratingDistribution
-  //         });
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching review stats:', error);
-  //       // Set default stats on error
-  //       setStats({
-  //         totalReviews: 0,
-  //         averageRating: 0,
-  //         ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
-  //       });
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStats();
-  // }, [productId, reviews]);
-
-  // Show skeleton loader while loading
-  if ( !stats) {
+  if (showSkeleton) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 animate-pulse">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -84,6 +40,50 @@ const ReviewsSummary = ({ productId, reviews = [], stats, onAddReviewClick }) =>
           <div className="text-center lg:text-right">
             <div className="h-12 bg-gray-300 rounded w-32 mx-auto lg:mx-0"></div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If we have reviews but stats are still loading, show a minimal version
+  if (!stats && reviews.length > 0) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          {/* Simple summary when stats are loading but we have reviews */}
+          <div className="text-center lg:text-left">
+            <div className="text-2xl font-bold text-teal-600 mb-2">
+              {reviews.length} {reviews.length === 1 ? 'Review' : 'Reviews'}
+            </div>
+            <p className="text-gray-600 text-sm">Loading detailed stats...</p>
+          </div>
+          
+          {/* Add Review Button */}
+          <div className="text-center lg:text-right">
+            <button
+              onClick={onAddReviewClick}
+              className="bg-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-teal-700 transition-colors shadow-lg"
+            >
+              Write a Review
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If no stats and no reviews (edge case)
+  if (!stats) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div className="text-center">
+          <p className="text-gray-600">No review data available</p>
+          <button
+            onClick={onAddReviewClick}
+            className="bg-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-teal-700 transition-colors shadow-lg mt-4"
+          >
+            Write a Review
+          </button>
         </div>
       </div>
     );

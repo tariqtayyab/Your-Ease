@@ -354,11 +354,11 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
                 </button>
 
                 {/* Cart Persistence Info */}
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                {/* <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-xs text-blue-700 text-center">
                     Your cart is automatically saved and will persist between visits
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

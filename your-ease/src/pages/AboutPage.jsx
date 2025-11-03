@@ -44,7 +44,7 @@ const AboutPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/shop"
+              to="/"
               className="bg-white text-[#2c9ba3] px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg"
             >
               Explore Products

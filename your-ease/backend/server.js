@@ -24,6 +24,7 @@
   import analyticsRoutes from './routes/analyticsRoutes.js';
   import { scheduleDataCleanup } from "./controllers/dataRetentionController.js"; 
   import contactRoutes from './routes/contactRoutes.js';
+  import saleRoutes from './routes/saleRoutes.js';
   
 
   dotenv.config();
@@ -53,6 +54,7 @@
   app.use("/api/categories", categoryRoutes);
   app.use('/api/analytics', analyticsRoutes);
   app.use("/api/import", importRoutes);
+  app.use("/api/sales", saleRoutes);
   app.use("/api/banners", bannerRoutes); // <-- dedicated route
   app.use('/api', contactRoutes);
   app.use("/api/admin", adminRoutes);

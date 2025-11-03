@@ -1,122 +1,139 @@
-// src/components/ProductReviews.jsx - UPDATED
+// src/components/ProductReviews.jsx - OPTIMIZED
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReviewsSummary from './ReviewsSummary';
 import ReviewForm from './ReviewForm';
 import ReviewItem from './ReviewItem';
 import LoadingSpinner from '../LoadingSpinner';
 import EndOfResults from '../EndOfResults';
-import { getProductReviews, deleteReview,getProductReviewStats  } from '../../api';
+import { getProductReviews, deleteReview, getProductReviewStats } from '../../api';
 
 const ProductReviews = ({ productId, onAddReview, user }) => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
   const observerRef = useRef();
   const loadingRef = useRef();
 
-  const LIMIT = 5; // Load 5 reviews at a time
+  const LIMIT = 5;
+
+  // Function to remove duplicate reviews
+  const removeDuplicateReviews = (reviewsArray) => {
+    const seen = new Set();
+    return reviewsArray.filter(review => {
+      if (seen.has(review._id)) {
+        console.warn('Removing duplicate review:', review._id);
+        return false;
+      }
+      seen.add(review._id);
+      return true;
+    });
+  };
 
   // Handle delete review function
   const handleDeleteReview = async (reviewId) => {
     try {
       await deleteReview(reviewId);
-      // Remove the deleted review from state
       setReviews(prev => prev.filter(review => review._id !== reviewId));
-      // You might also want to refetch review stats here
+      // Refresh stats after deletion
+      fetchStats();
     } catch (error) {
       console.error('Error deleting review:', error);
-      throw error; // This will be caught in ReviewItem
+      throw error;
     }
   };
 
-  // Fetch initial reviews
+  // Fetch stats - optimized
+  const fetchStats = useCallback(async () => {
+    if (!productId) return;
+    
+    try {
+      setStatsLoading(true);
+      const reviewStats = await getProductReviewStats(productId);
+      setStats(reviewStats);
+    } catch (error) {
+      console.error('Error fetching review stats:', error);
+      // Fallback to calculating from local reviews
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0 
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+        : 0;
+
+      const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      reviews.forEach(review => {
+        if (review.rating >= 1 && review.rating <= 5) {
+          ratingDistribution[review.rating]++;
+        }
+      });
+
+      setStats({
+        totalReviews,
+        averageRating,
+        ratingDistribution
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  }, [productId, reviews]);
+
+  // Fetch initial reviews and stats
   useEffect(() => {
-    const fetchInitialReviews = async () => {
+    const fetchInitialData = async () => {
       try {
-        setLoading(true);
-        const response = await getProductReviews(productId, 1, LIMIT);
-        setReviews(response.reviews || response);
-        setHasMore(response.pagination?.hasMore ?? (response.length === LIMIT));
+        setInitialLoading(true);
+        
+        // Fetch reviews and stats in parallel
+        const [reviewsResponse] = await Promise.all([
+          getProductReviews(productId, 1, LIMIT),
+          fetchStats() // Fetch stats in parallel
+        ]);
+        
+        const reviewsData = reviewsResponse.reviews || reviewsResponse;
+        const uniqueReviews = removeDuplicateReviews(reviewsData);
+        setReviews(uniqueReviews);
+        setHasMore(reviewsResponse.pagination?.hasMore ?? (uniqueReviews.length === LIMIT));
       } catch (error) {
-        console.error('Error fetching reviews:', error);
+        console.error('Error fetching initial data:', error);
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
       }
     };
 
-    fetchInitialReviews();
+    if (productId) {
+      fetchInitialData();
+    }
   }, [productId]);
-
-  useEffect(() => {
-      const fetchStats = async () => {
-        setLoading(true);
-        try {
-          if (productId) {
-            const reviewStats = await getProductReviewStats(productId);
-            setStats(reviewStats);
-          } else {
-            // Calculate from provided reviews array (fallback)
-            const totalReviews = reviews.length;
-            const averageRating = totalReviews > 0 
-              ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
-              : 0;
-  
-            const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-            reviews.forEach(review => {
-              if (review.rating >= 1 && review.rating <= 5) {
-                ratingDistribution[review.rating]++;
-              }
-            });
-  
-            setStats({
-              totalReviews,
-              averageRating,
-              ratingDistribution
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching review stats:', error);
-          // Set default stats on error
-          setStats({
-            totalReviews: 0,
-            averageRating: 0,
-            ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
-          });
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchStats();
-    }, [productId, reviews]);
 
   // Load more reviews function
   const loadMoreReviews = useCallback(async () => {
-    if (loading || !hasMore) return;
+    if (loadingMore || !hasMore) return;
     
-    setLoading(true);
+    setLoadingMore(true);
     try {
       const nextPage = page + 1;
       const response = await getProductReviews(productId, nextPage, LIMIT);
       const newReviews = response.reviews || response;
+      const uniqueNewReviews = removeDuplicateReviews(newReviews);
+      const combinedReviews = removeDuplicateReviews([...reviews, ...uniqueNewReviews]);
       
-      setReviews(prev => [...prev, ...newReviews]);
+      setReviews(combinedReviews);
       setPage(nextPage);
-      setHasMore(response.pagination?.hasMore ?? (newReviews.length === LIMIT));
+      setHasMore(response.pagination?.hasMore ?? (uniqueNewReviews.length === LIMIT));
     } catch (error) {
       console.error('Error loading more reviews:', error);
     } finally {
-      setLoading(false);
+      setLoadingMore(false);
     }
-  }, [productId, page, loading, hasMore]);
+  }, [productId, page, loadingMore, hasMore, reviews]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
-    if (!hasMore || loading) return;
+    if (!hasMore || loadingMore) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -136,10 +153,10 @@ const ProductReviews = ({ productId, onAddReview, user }) => {
         observer.unobserve(loadingRef.current);
       }
     };
-  }, [loadMoreReviews, hasMore, loading]);
+  }, [loadMoreReviews, hasMore, loadingMore]);
 
-  // Sort reviews
-  const sortedReviews = [...reviews].sort((a, b) => {
+  // Sort reviews and ensure no duplicates
+  const sortedReviews = removeDuplicateReviews([...reviews]).sort((a, b) => {
     switch (sortBy) {
       case 'newest':
         return new Date(b.createdAt) - new Date(a.createdAt);
@@ -156,11 +173,18 @@ const ProductReviews = ({ productId, onAddReview, user }) => {
 
   const handleAddReview = async (reviewData) => {
     try {
-      // Refresh reviews after adding a new one
-      const response = await getProductReviews(productId, 1, LIMIT);
-      setReviews(response.reviews || response);
+      // Refresh both reviews and stats after adding a new review
+      const [reviewsResponse] = await Promise.all([
+        getProductReviews(productId, 1, LIMIT),
+        fetchStats()
+      ]);
+      
+      const reviewsData = reviewsResponse.reviews || reviewsResponse;
+      const uniqueReviews = removeDuplicateReviews(reviewsData);
+      
+      setReviews(uniqueReviews);
       setPage(1);
-      setHasMore(response.pagination?.hasMore ?? (response.length === LIMIT));
+      setHasMore(reviewsResponse.pagination?.hasMore ?? (uniqueReviews.length === LIMIT));
       setShowReviewForm(false);
       
       if (onAddReview) {
@@ -171,99 +195,31 @@ const ProductReviews = ({ productId, onAddReview, user }) => {
     }
   };
 
-  // Skeleton loader for initial loading
-  // if (loading && reviews.length === 0) {
-  //   return (
-  //     <div className="space-y-6 animate-pulse">
-  //       {/* Reviews Summary Skeleton */}
-  //       <div className="bg-white rounded-2xl shadow-sm p-6">
-  //         <div className="flex flex-col md:flex-row gap-8">
-  //           {/* Overall Rating Skeleton */}
-  //           <div className="flex-1 space-y-4">
-  //             <div className="h-8 bg-gray-300 rounded w-32"></div>
-  //             <div className="h-6 bg-gray-300 rounded w-24"></div>
-  //             <div className="h-4 bg-gray-300 rounded w-40"></div>
-  //             <div className="h-12 bg-gray-300 rounded w-48"></div>
-  //           </div>
-            
-  //           {/* Rating Breakdown Skeleton */}
-  //           <div className="flex-1 space-y-3">
-  //             {[...Array(5)].map((_, index) => (
-  //               <div key={index} className="flex items-center gap-3">
-  //                 <div className="h-4 bg-gray-300 rounded w-16"></div>
-  //                 <div className="flex-1 h-2 bg-gray-300 rounded"></div>
-  //                 <div className="h-4 bg-gray-300 rounded w-8"></div>
-  //               </div>
-  //             ))}
-  //           </div>
-  //         </div>
-  //       </div>
-
-  //       {/* Sort Options Skeleton */}
-  //       <div className="flex items-center gap-3">
-  //         <div className="h-4 bg-gray-300 rounded w-16"></div>
-  //         <div className="h-10 bg-gray-300 rounded w-32"></div>
-  //       </div>
-
-  //       {/* Review Items Skeleton */}
-  //       <div className="space-y-4">
-  //         {[...Array(3)].map((_, index) => (
-  //           <div key={index} className="bg-white rounded-2xl shadow-sm p-6">
-  //             {/* Review Header Skeleton */}
-  //             <div className="flex items-center gap-3 mb-4">
-  //               <div className="h-10 w-10 bg-gray-300 rounded-full"></div>
-  //               <div className="space-y-2 flex-1">
-  //                 <div className="h-4 bg-gray-300 rounded w-32"></div>
-  //                 <div className="h-3 bg-gray-300 rounded w-24"></div>
-  //               </div>
-  //               <div className="h-6 bg-gray-300 rounded w-16"></div>
-  //             </div>
-              
-  //             {/* Review Content Skeleton */}
-  //             <div className="space-y-2">
-  //               <div className="h-4 bg-gray-300 rounded"></div>
-  //               <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-  //               <div className="h-4 bg-gray-300 rounded w-4/6"></div>
-  //             </div>
-              
-  //             {/* Review Media Skeleton */}
-  //             <div className="flex gap-2 mt-4">
-  //               {[...Array(2)].map((_, mediaIndex) => (
-  //                 <div key={mediaIndex} className="w-16 h-16 bg-gray-300 rounded-lg"></div>
-  //               ))}
-  //             </div>
-  //           </div>
-  //         ))}
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="space-y-6">
-      {/* Reviews Summary */}
+      {/* Reviews Summary - Only show skeleton on initial load */}
       <ReviewsSummary 
         productId={productId}
         reviews={reviews} 
         onAddReviewClick={() => setShowReviewForm(true)}
         stats={stats}
+        loading={initialLoading || statsLoading}
       />
       
-      {/* Review Form - PASS user prop here */}
+      {/* Review Form */}
       {showReviewForm && (
         <ReviewForm 
           productId={productId}
           onSubmit={handleAddReview}
           onCancel={() => setShowReviewForm(false)}
-          user={user} // ADD THIS LINE
+          user={user}
         />
       )}
 
       {/* Reviews Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        
         {/* Sort Options */}
-        {reviews.length > 0 && (
+        {sortedReviews.length > 0 && (
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-gray-700">Sort by:</label>
             <select
@@ -286,26 +242,26 @@ const ProductReviews = ({ productId, onAddReview, user }) => {
           <>
             {sortedReviews.map((review) => (
               <ReviewItem 
-                key={review._id} 
+                key={`${review._id}-${review.createdAt}`}
                 review={review} 
                 currentUser={user}
-                onDeleteReview={handleDeleteReview} // ADD THIS LINE
+                onDeleteReview={handleDeleteReview}
               />
             ))}
             
             {/* Loading spinner for infinite scroll */}
-            {loading && <LoadingSpinner />}
+            {loadingMore && <LoadingSpinner />}
             
             {/* End of results message */}
             {!hasMore && reviews.length > 0 && <EndOfResults />}
             
             {/* Observer target for infinite scroll */}
-            {hasMore && !loading && (
+            {hasMore && !loadingMore && (
               <div ref={loadingRef} className="h-4" />
             )}
           </>
         ) : (
-          !loading && (
+          !initialLoading && (
             <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -330,7 +286,7 @@ const ProductReviews = ({ productId, onAddReview, user }) => {
       </div>
 
       {/* Initial loading state */}
-      {loading && reviews.length === 0 && <LoadingSpinner />}
+      {initialLoading && reviews.length === 0 && <LoadingSpinner />}
     </div>
   );
 };

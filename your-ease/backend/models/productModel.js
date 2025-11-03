@@ -19,6 +19,11 @@ const productSchema = new mongoose.Schema({
   currentPrice: { type: Number, default: 0 },
   countInStock: { type: Number, default: 0 },
   isHotSelling: { type: Boolean, default: false },
+  activeSale: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Sale",
+  default: null
+},
   position: { 
     type: Number, 
     default: 0

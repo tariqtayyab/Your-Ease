@@ -52,6 +52,7 @@ import OrderManagement from "../components/OrderManagement";
 import AnalyticsDashboard from "../components/AnalyticsDashboard";
 import BannerAdmin from "../pages/admin/BannerAdmin";
 import CategoriesAdmin from "../pages/admin/CategoriesAdmin";
+import SalesAdmin from "../pages/admin/SalesAdmin";
 
 // Loading Spinner Component
 const LoadingSpinner = ({ size = "medium" }) => {
@@ -582,14 +583,16 @@ const Account = () => {
       { id: "wishlist", label: "Wishlist", icon: Heart },
       { id: "addresses", label: "Addresses", icon: MapPin },
       { id: "settings", label: "Account Settings", icon: Settings },
+      { id: "sales", label: "Sales Management", icon: Tag },
     ];
 
     const adminItems = [
       { id: "dashboard", label: "Analytics", icon: BarChart3 },
-      { id: "orders", label: "Order Management", icon: ShoppingBag },
-      { id: "banners", label: "Banner Management", icon: Image },
-      { id: "categories", label: "Category Management", icon: List },
-      { id: "settings", label: "Account Settings", icon: Settings },
+  { id: "orders", label: "Order Management", icon: ShoppingBag },
+  { id: "sales", label: "Sales Management", icon: Tag }, // NEW: Added sales management
+  { id: "banners", label: "Banner Management", icon: Image },
+  { id: "categories", label: "Category Management", icon: List },
+  { id: "settings", label: "Account Settings", icon: Settings },
     ];
 
     return user?.isAdmin ? adminItems : userItems;
@@ -1162,6 +1165,13 @@ const Account = () => {
                   <CategoriesAdmin />
                 </div>
               )}
+
+              {activeTab === "sales" && user.isAdmin && (
+  <div className="bg-white rounded-2xl shadow-sm p-6">
+    <h2 className="text-xl font-bold text-gray-900 mb-6">Sales Management</h2>
+    <SalesAdmin />
+  </div>
+)}
 
               {/* Account Settings Tab - For both */}
               {activeTab === "settings" && (

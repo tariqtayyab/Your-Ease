@@ -69,17 +69,26 @@ export const getProductReviews = asyncHandler(async (req, res) => {
 // @route   GET /api/products/:productId/reviews/stats
 // @access  Public
 export const getProductReviewStats = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.productId);
-  
-  if (!product) {
-    return res.status(404).json({ message: "Product not found" });
-  }
+  try {
+    const product = await Product.findById(req.params.productId).select('rating numReviews ratingDistribution');
+    
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
-  res.json({
-    totalReviews: product.numReviews,
-    averageRating: product.rating,
-    ratingDistribution: product.ratingDistribution
-  });
+    // Return the stats directly from the product document
+    res.json({
+      totalReviews: product.numReviews || 0,
+      averageRating: product.rating || 0,
+      ratingDistribution: product.ratingDistribution || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    });
+  } catch (error) {
+    console.error('Error fetching review stats:', error);
+    res.status(500).json({ 
+      message: "Error fetching review stats", 
+      error: error.message 
+    });
+  }
 });
 
 // @desc    Create a review

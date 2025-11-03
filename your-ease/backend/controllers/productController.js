@@ -1,4 +1,4 @@
-// controllers/productController.js - UPDATED
+// controllers/productController.js - UPDATED WITH ACTIVE SALE POPULATION
 import asyncHandler from "express-async-handler";
 import Product from "../models/productModel.js";
 import Category from "../models/Category.js";
@@ -11,7 +11,8 @@ export const getProducts = asyncHandler(async (req, res) => {
   if (category) filter.category = category;
   
   const products = await Product.find(filter)
-    .select('-ratingDistribution') // Exclude heavy distribution data if not needed
+    .populate('activeSale') // ADDED: Populate active sale data
+    .select('-ratingDistribution')
     .sort({ position: 1, createdAt: -1 });
   
   res.json(products);
@@ -21,7 +22,8 @@ export const getProducts = asyncHandler(async (req, res) => {
 export const getProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id)
     .populate("category")
-    .select('-ratingDistribution'); // Exclude distribution for single product if not needed
+    .populate('activeSale') // ADDED: Populate active sale data
+    .select('-ratingDistribution');
   
   if (!product) return res.status(404).json({ message: "Product not found" });
   res.json(product);
@@ -40,7 +42,8 @@ export const createProduct = asyncHandler(async (req, res) => {
     countInStock = 0,
     isHotSelling = false,
     position = 0,
-    options = [] // ADD OPTIONS FIELD
+    options = [],
+    activeSale = null // ADDED: Handle active sale if provided
   } = req.body;
 
   // Handle images from Cloudinary file uploads
@@ -93,10 +96,8 @@ export const createProduct = asyncHandler(async (req, res) => {
   if (specifications) {
     if (typeof specifications === 'string') {
       try {
-        // Try to parse as JSON first
         parsedSpecifications = JSON.parse(specifications);
       } catch (error) {
-        // If JSON parsing fails, try to parse as key-value pairs
         const lines = specifications.split('\n');
         lines.forEach(line => {
           const colonIndex = line.indexOf(':');
@@ -126,8 +127,8 @@ export const createProduct = asyncHandler(async (req, res) => {
     countInStock,
     isHotSelling,
     position: parseInt(position) || 0,
-    options: parsedOptions, // ADD OPTIONS TO PRODUCT CREATION
-    // Rating fields will use defaults (0)
+    options: parsedOptions,
+    activeSale, // ADDED: Include active sale reference
   });
 
   if (categoryId) {
@@ -148,7 +149,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
   if (req.files && req.files.length > 0) {
     const newImages = req.files.map(file => {
       const isVideo = file.resource_type === 'video' || 
-                     file.mimetype?.startsWith('video/') ||
+                     file.mimeType?.startsWith('video/') ||
                      file.originalname?.toLowerCase().match(/\.(mp4|mov|avi|mkv|webm|wmv|flv|3gp|m4v)$/);
       
       return {
@@ -206,10 +207,8 @@ export const updateProduct = asyncHandler(async (req, res) => {
   // Parse specifications if it's a string
   if (updates.specifications && typeof updates.specifications === "string") {
     try {
-      // Try to parse as JSON first
       updates.specifications = JSON.parse(updates.specifications);
     } catch (error) {
-      // If JSON parsing fails, try to parse as key-value pairs
       const lines = updates.specifications.split('\n');
       const specs = {};
       lines.forEach(line => {
@@ -237,7 +236,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
   res.json(product);
 });
 
-// DELETE /api/products/:id - UPDATED TO DELETE RELATED REVIEWS
+// DELETE /api/products/:id
 export const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) return res.status(404).json({ message: "Product not found" });
@@ -253,7 +252,6 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     console.log(`🗑️ Deleted ${deleteResult.deletedCount} reviews for product ${req.params.id}`);
   } catch (error) {
     console.error("❌ Error deleting product reviews:", error);
-    // Continue with product deletion even if review deletion fails
   }
 
   await product.deleteOne();
@@ -263,9 +261,9 @@ export const deleteProduct = asyncHandler(async (req, res) => {
   });
 });
 
-// ADD THIS NEW FUNCTION FOR UPDATING PRODUCT POSITIONS
+// UPDATE PRODUCT POSITIONS
 export const updateProductPositions = asyncHandler(async (req, res) => {
-  const { updates } = req.body; // Array of { productId, position }
+  const { updates } = req.body;
   
   if (!Array.isArray(updates)) {
     return res.status(400).json({ message: "Updates array is required" });
@@ -281,4 +279,32 @@ export const updateProductPositions = asyncHandler(async (req, res) => {
   await Product.bulkWrite(bulkOps);
   
   res.json({ message: "Product positions updated successfully" });
+});
+
+// ADD THIS NEW ROUTE FOR MIGRATION
+export const migrateActiveSaleField = asyncHandler(async (req, res) => {
+  try {
+    console.log('🔄 Starting activeSale field migration...');
+    
+    // Update all products to set activeSale: null if field doesn't exist
+    const result = await Product.updateMany(
+      { activeSale: { $exists: false } },
+      { $set: { activeSale: null } }
+    );
+    
+    console.log(`✅ Migration completed: ${result.modifiedCount} products updated`);
+    
+    res.json({
+      message: `Active sale field migration completed successfully`,
+      modifiedCount: result.modifiedCount,
+      matchedCount: result.matchedCount
+    });
+    
+  } catch (error) {
+    console.error('❌ Migration error:', error);
+    res.status(500).json({
+      message: 'Migration failed',
+      error: error.message
+    });
+  }
 });

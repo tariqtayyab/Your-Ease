@@ -399,7 +399,7 @@ export default function Navbar() {
             </Link>
 
             {/* Login/Logout - desktop */}
-            <div className="hidden md:flex items-center">
+            {/* <div className="hidden md:flex items-center">
               {userInfo ? (
                 <button
                   onClick={() => {
@@ -420,7 +420,7 @@ export default function Navbar() {
                   Login
                 </Link>
               )}
-            </div>
+            </div> */}
 
             {/* mobile menu */}
             <button
