@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import { getSales, createSale, updateSale, deleteSale } from '../../api';
 
-// API base URL helper
-const getApiBaseUrl = () => {
-  return '';
-};
+// Get API URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://your-ease.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://your-ease.onrender.com/api';
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://yourease.shop';
 
 const SalesAdmin = () => {
   const [sales, setSales] = useState([]);
@@ -34,7 +34,9 @@ const SalesAdmin = () => {
     domain: '',
     lastError: '',
     endpointsTried: [],
-    apiStatus: 'unknown'
+    apiStatus: 'unknown',
+    backendUrl: API_BASE_URL,
+    apiUrl: API_URL
   });
   
   // Form state
@@ -50,7 +52,9 @@ const SalesAdmin = () => {
   useEffect(() => {
     setDebugInfo(prev => ({
       ...prev,
-      domain: window.location.hostname
+      domain: window.location.hostname,
+      backendUrl: API_BASE_URL,
+      apiUrl: API_URL
     }));
     fetchSales();
     fetchProducts();
@@ -85,12 +89,11 @@ const SalesAdmin = () => {
 
   const fetchProducts = async () => {
     const endpoints = [
-      '/api/products?limit=1000',
-      '/api/products/all',
-      '/api/products/list', 
-      '/api/v1/products',
-      '/products/api',
-      'https://yourease.shop/api/products'
+      `${API_URL}/products?limit=1000`,
+      `${API_BASE_URL}/api/products?limit=1000`,
+      `${API_URL}/products/all`,
+      `${API_URL}/products/list`, 
+      `${API_URL}/v1/products`,
     ];
 
     setDebugInfo(prev => ({
@@ -396,6 +399,11 @@ const SalesAdmin = () => {
               </div>
               
               <div>
+                <span className="font-medium text-gray-600">Backend URL:</span>
+                <div className="text-gray-900 font-mono text-xs">{debugInfo.backendUrl}</div>
+              </div>
+              
+              <div>
                 <span className="font-medium text-gray-600">API Status:</span>
                 <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getApiStatusColor()}`}>
                   {debugInfo.apiStatus}
@@ -571,7 +579,7 @@ const SalesAdmin = () => {
           </div>
         </div>
 
-        {/* Sales Form Modal - Keep your existing form JSX here */}
+        {/* Sales Form Modal */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
