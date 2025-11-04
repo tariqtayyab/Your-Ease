@@ -432,74 +432,74 @@ const checkSaleStatus = async (product) => {
     return false;
   };
 
-  const handleAddToCart = () => {
-    if (!product || product.countInStock === 0) return;
+ const handleAddToCart = (showSuccess = true) => {
+  if (!product || product.countInStock === 0) return;
 
-    const rawImage = product.images?.[0] || product.image;
-    const processedImage = getImageUrl(rawImage);
+  const rawImage = product.images?.[0] || product.image;
+  const processedImage = getImageUrl(rawImage);
 
-    const cartItem = {
-      id: product._id,
-      _id: product._id,
-      title: product.title,
-      price: product.currentPrice || product.price,
-      oldPrice: product.oldPrice,
-      image: processedImage,
-      quantity: quantity,
-      countInStock: product.countInStock,
-      category: product.category,
-      selectedOptions: Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined
-    };
+  const cartItem = {
+    id: product._id,
+    _id: product._id,
+    title: product.title,
+    price: product.currentPrice || product.price,
+    oldPrice: product.oldPrice,
+    image: processedImage,
+    quantity: quantity,
+    countInStock: product.countInStock,
+    category: product.category,
+    selectedOptions: Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined
+  };
 
-    let updatedCart = [];
+  let updatedCart = [];
 
-    try {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        updatedCart = JSON.parse(savedCart);
-        
-        const existingItemIndex = updatedCart.findIndex(item => 
-          item.id === product._id || item._id === product._id
-        );
+  try {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      updatedCart = JSON.parse(savedCart);
+      
+      const existingItemIndex = updatedCart.findIndex(item => 
+        item.id === product._id || item._id === product._id
+      );
 
-        if (existingItemIndex > -1) {
-          updatedCart[existingItemIndex].quantity += quantity;
-        } else {
-          updatedCart.push(cartItem);
-        }
+      if (existingItemIndex > -1) {
+        updatedCart[existingItemIndex].quantity += quantity;
       } else {
-        updatedCart = [cartItem];
+        updatedCart.push(cartItem);
       }
+    } else {
+      updatedCart = [cartItem];
+    }
 
-      saveCartToLocalStorage(updatedCart);
+    saveCartToLocalStorage(updatedCart);
 
-      if (onAddToCart) {
-        onAddToCart(cartItem);
-      }
+    if (onAddToCart) {
+      onAddToCart(cartItem);
+    }
 
+    if (showSuccess) {
       setShowCartSuccess(true);
       setTimeout(() => {
         setShowCartSuccess(false);
       }, 3000);
-
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      alert("Error adding product to cart. Please try again.");
     }
-  };
 
-  // Handle Buy Now - Add to cart and redirect to checkout
-  const handleBuyNow = () => {
-    if (!product || product.countInStock === 0) return;
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    alert("Error adding product to cart. Please try again.");
+  }
+};
 
-    if(!isProductInCart){
-      handleAddToCart();
-    }
-    
-    setTimeout(() => {
-      navigate('/checkout');
-    }, 500);
-  };
+// Handle Buy Now - Add to cart and redirect to checkout
+const handleBuyNow = () => {
+  if (!product || product.countInStock === 0) return;
+
+  if(!productInCart){
+    handleAddToCart(false); // Pass false to hide success message
+  }
+  
+  navigate('/checkout');
+};
 
   // Handle WhatsApp Order
   const handleWhatsAppOrder = () => {

@@ -1,4 +1,4 @@
-    // src/pages/admin/SalesAdmin.jsx
+// src/pages/admin/SalesAdmin.jsx
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
@@ -12,9 +12,15 @@ import {
   Filter,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  RefreshCw
 } from 'lucide-react';
 import { getSales, createSale, updateSale, deleteSale } from '../../api';
+
+// API base URL helper
+const getApiBaseUrl = () => {
+  return '';
+};
 
 const SalesAdmin = () => {
   const [sales, setSales] = useState([]);
@@ -24,6 +30,12 @@ const SalesAdmin = () => {
   const [editingSale, setEditingSale] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [debugInfo, setDebugInfo] = useState({
+    domain: '',
+    lastError: '',
+    endpointsTried: [],
+    apiStatus: 'unknown'
+  });
   
   // Form state
   const [formData, setFormData] = useState({
@@ -36,6 +48,10 @@ const SalesAdmin = () => {
 
   // Fetch sales and products
   useEffect(() => {
+    setDebugInfo(prev => ({
+      ...prev,
+      domain: window.location.hostname
+    }));
     fetchSales();
     fetchProducts();
   }, []);
@@ -44,15 +60,23 @@ const SalesAdmin = () => {
     try {
       setLoading(true);
       const data = await getSales();
-      console.log('Sales data:', data); // Debug log
+      console.log('🛒 Sales data:', data);
       if (data.sales) {
         setSales(data.sales);
       } else if (Array.isArray(data)) {
-        // Handle case where API returns array directly
         setSales(data);
       }
+      setDebugInfo(prev => ({
+        ...prev,
+        apiStatus: 'sales_loaded'
+      }));
     } catch (error) {
-      console.error('Error fetching sales:', error);
+      console.error('❌ Error fetching sales:', error);
+      setDebugInfo(prev => ({
+        ...prev,
+        lastError: `Sales: ${error.message}`,
+        apiStatus: 'sales_error'
+      }));
       alert('Error loading sales: ' + error.message);
     } finally {
       setLoading(false);
@@ -60,17 +84,94 @@ const SalesAdmin = () => {
   };
 
   const fetchProducts = async () => {
-    try {
-      const response = await fetch('/api/products');
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
+    const endpoints = [
+      '/api/products?limit=1000',
+      '/api/products/all',
+      '/api/products/list', 
+      '/api/v1/products',
+      '/products/api',
+      'https://yourease.shop/api/products'
+    ];
+
+    setDebugInfo(prev => ({
+      ...prev,
+      endpointsTried: [],
+      apiStatus: 'loading_products'
+    }));
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`🔍 Trying endpoint: ${endpoint}`);
+        setDebugInfo(prev => ({
+          ...prev,
+          endpointsTried: [...prev.endpointsTried, endpoint]
+        }));
+
+        const response = await fetch(endpoint);
+        console.log(`📡 Response status for ${endpoint}:`, response.status);
+
+        if (!response.ok) {
+          console.log(`❌ HTTP ${response.status} for ${endpoint}`);
+          continue;
+        }
+
+        const responseText = await response.text();
+        console.log(`📄 Raw response from ${endpoint}:`, responseText.substring(0, 500));
+
+        // Check if response is HTML (error page)
+        if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+          console.log(`❌ Got HTML instead of JSON from ${endpoint}`);
+          continue;
+        }
+
+        // Try to parse as JSON
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.log(`❌ JSON parse error for ${endpoint}:`, parseError);
+          continue;
+        }
+
+        console.log(`✅ Successfully parsed data from ${endpoint}:`, data);
+
+        // Handle different response structures
+        let productsData = [];
+        if (data.products && Array.isArray(data.products)) {
+          productsData = data.products;
+        } else if (Array.isArray(data)) {
+          productsData = data;
+        } else if (data.data && Array.isArray(data.data)) {
+          productsData = data.data;
+        } else {
+          console.log(`❌ Unexpected data structure from ${endpoint}:`, data);
+          continue;
+        }
+
+        console.log(`✅ Loaded ${productsData.length} products from ${endpoint}`);
+        setProducts(productsData);
+        setDebugInfo(prev => ({
+          ...prev,
+          apiStatus: 'products_loaded',
+          lastError: ''
+        }));
+        return; // Success, exit the loop
+
+      } catch (error) {
+        console.log(`❌ Error with endpoint ${endpoint}:`, error.message);
+        continue;
       }
-      const data = await response.json();
-      setProducts(data.products || data || []);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      alert('Error loading products: ' + error.message);
     }
+
+    // If we get here, all endpoints failed
+    const errorMsg = 'All product endpoints failed. Check if backend is running and CORS is configured.';
+    console.error('❌', errorMsg);
+    setDebugInfo(prev => ({
+      ...prev,
+      apiStatus: 'all_endpoints_failed',
+      lastError: errorMsg
+    }));
+    setProducts([]);
   };
 
   const handleSubmit = async (e) => {
@@ -102,7 +203,7 @@ const SalesAdmin = () => {
         result = await createSale(formData);
       }
 
-      console.log('Save result:', result); // Debug log
+      console.log('💾 Save result:', result);
 
       if (result.message) {
         alert(result.message);
@@ -112,7 +213,7 @@ const SalesAdmin = () => {
         throw new Error('No response message from server');
       }
     } catch (error) {
-      console.error('Error saving sale:', error);
+      console.error('❌ Error saving sale:', error);
       alert('Error saving sale: ' + (error.message || 'Please check console for details'));
     } finally {
       setLoading(false);
@@ -132,7 +233,7 @@ const SalesAdmin = () => {
   };
 
   const handleDelete = async (saleId) => {
-    if (!confirm('Are you sure you want to delete this sale? This will revert all product prices.')) {
+    if (!confirm('Are you sure you want to delete this sale? This will remove sale associations from products.')) {
       return;
     }
 
@@ -147,7 +248,7 @@ const SalesAdmin = () => {
         throw new Error('No response message from server');
       }
     } catch (error) {
-      console.error('Error deleting sale:', error);
+      console.error('❌ Error deleting sale:', error);
       alert('Error deleting sale: ' + error.message);
     } finally {
       setLoading(false);
@@ -191,6 +292,12 @@ const SalesAdmin = () => {
     }));
   };
 
+  const refreshAllData = () => {
+    console.log('🔄 Refreshing all data...');
+    fetchSales();
+    fetchProducts();
+  };
+
   // Helper functions
   const getSaleStatus = (sale) => {
     if (!sale.isActive) return 'inactive';
@@ -231,6 +338,21 @@ const SalesAdmin = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const getApiStatusColor = () => {
+    switch (debugInfo.apiStatus) {
+      case 'products_loaded':
+      case 'sales_loaded':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'loading_products':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'sales_error':
+      case 'all_endpoints_failed':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -244,11 +366,118 @@ const SalesAdmin = () => {
             <button
               onClick={() => setShowForm(true)}
               className="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2"
+              disabled={products.length === 0}
             >
               <Plus className="w-5 h-5" />
               Create New Sale
             </button>
           </div>
+          
+          {/* Debug Information Panel */}
+          <div className="mt-4 p-4 border rounded-lg bg-white">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-blue-600" />
+                <h3 className="font-semibold text-gray-900">Debug Information</h3>
+              </div>
+              <button
+                onClick={refreshAllData}
+                className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-gray-600">Domain:</span>
+                <div className="text-gray-900 font-mono">{debugInfo.domain}</div>
+              </div>
+              
+              <div>
+                <span className="font-medium text-gray-600">API Status:</span>
+                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getApiStatusColor()}`}>
+                  {debugInfo.apiStatus}
+                </div>
+              </div>
+              
+              <div>
+                <span className="font-medium text-gray-600">Products:</span>
+                <div className="text-gray-900">
+                  {products.length} loaded
+                  {products.length === 0 && (
+                    <span className="text-red-600 ml-2">❌</span>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <span className="font-medium text-gray-600">Sales:</span>
+                <div className="text-gray-900">{sales.length} loaded</div>
+              </div>
+            </div>
+
+            {debugInfo.lastError && (
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                <div className="flex items-center gap-2 mb-1">
+                  <XCircle className="w-4 h-4 text-red-600" />
+                  <span className="font-medium text-red-800">Last Error:</span>
+                </div>
+                <div className="text-red-700 text-sm font-mono">{debugInfo.lastError}</div>
+              </div>
+            )}
+
+            {debugInfo.endpointsTried.length > 0 && (
+              <div className="mt-3">
+                <span className="font-medium text-gray-600 text-sm">Endpoints tried:</span>
+                <div className="mt-1 space-y-1">
+                  {debugInfo.endpointsTried.map((endpoint, index) => (
+                    <div key={index} className="text-xs font-mono text-gray-500 bg-gray-50 p-1 rounded">
+                      {endpoint}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {products.length === 0 && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="w-5 h-5 text-yellow-600" />
+                <span className="font-medium text-yellow-800">No Products Loaded</span>
+              </div>
+              <p className="text-yellow-700 text-sm mb-2">
+                This usually means the backend API is not accessible. Possible reasons:
+              </p>
+              <ul className="text-yellow-700 text-sm list-disc list-inside space-y-1">
+                <li>Backend server is not running</li>
+                <li><code>/api/products</code> route doesn't exist</li>
+                <li>CORS is not configured for your domain</li>
+                <li>Network connectivity issues</li>
+                <li>Check browser console (F12) for detailed errors</li>
+              </ul>
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={fetchProducts}
+                  className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors"
+                >
+                  Retry Loading Products
+                </button>
+                <button
+                  onClick={() => {
+                    console.clear();
+                    console.log('🧹 Console cleared. Retrying...');
+                    fetchProducts();
+                  }}
+                  className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
+                >
+                  Clear Console & Retry
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}
@@ -342,7 +571,7 @@ const SalesAdmin = () => {
           </div>
         </div>
 
-        {/* Sales Form Modal */}
+        {/* Sales Form Modal - Keep your existing form JSX here */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -438,31 +667,47 @@ const SalesAdmin = () => {
                     {formData.productSelection === 'selected' && (
                       <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
                         <h4 className="font-medium text-gray-700 mb-3">Select Products:</h4>
-                        <div className="space-y-2">
-                          {products.map(product => (
-                            <label key={product._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
-                              <input
-                                type="checkbox"
-                                checked={formData.products.includes(product._id)}
-                                onChange={() => toggleProductSelection(product._id)}
-                                className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
-                              />
-                              <img 
-                                src={product.images?.[0]?.url || product.image || '/placeholder.png'} 
-                                alt={product.title}
-                                className="w-8 h-8 object-cover rounded"
-                                onError={(e) => {
-                                  e.target.src = '/placeholder.png';
-                                }}
-                              />
-                              <span className="flex-1 text-sm">{product.title}</span>
-                              <span className="text-sm text-gray-500">Rs {product.currentPrice}</span>
-                            </label>
-                          ))}
-                        </div>
-                        <div className="mt-3 text-sm text-gray-600">
-                          Selected: {formData.products.length} products
-                        </div>
+                        {products.length === 0 ? (
+                          <div className="text-center py-4 text-gray-500">
+                            <Package className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                            <p>No products available</p>
+                            <button
+                              type="button"
+                              onClick={fetchProducts}
+                              className="mt-2 text-teal-600 hover:text-teal-700 text-sm"
+                            >
+                              Retry loading products
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="space-y-2">
+                              {products.map(product => (
+                                <label key={product._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                                  <input
+                                    type="checkbox"
+                                    checked={formData.products.includes(product._id)}
+                                    onChange={() => toggleProductSelection(product._id)}
+                                    className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                                  />
+                                  <img 
+                                    src={product.images?.[0]?.url || product.image || '/placeholder.png'} 
+                                    alt={product.title}
+                                    className="w-8 h-8 object-cover rounded"
+                                    onError={(e) => {
+                                      e.target.src = '/placeholder.png';
+                                    }}
+                                  />
+                                  <span className="flex-1 text-sm">{product.title}</span>
+                                  <span className="text-sm text-gray-500">Rs {product.currentPrice}</span>
+                                </label>
+                              ))}
+                            </div>
+                            <div className="mt-3 text-sm text-gray-600">
+                              Selected: {formData.products.length} products
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -478,9 +723,9 @@ const SalesAdmin = () => {
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || (formData.productSelection === 'selected' && products.length === 0)}
                     className={`flex-1 py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                      loading
+                      loading || (formData.productSelection === 'selected' && products.length === 0)
                         ? 'bg-gray-400 text-white cursor-not-allowed'
                         : 'bg-teal-600 text-white hover:bg-teal-700'
                     }`}
@@ -515,6 +760,7 @@ const SalesAdmin = () => {
                 <button
                   onClick={() => setShowForm(true)}
                   className="mt-3 text-teal-600 hover:text-teal-700 font-medium"
+                  disabled={products.length === 0}
                 >
                   Create your first sale
                 </button>

@@ -133,7 +133,7 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No Categories Available</h3>
-            <p className="text-gray-500">Products will appear here once they are organized into categories.</p>
+            <p className="text-gray-500">Please check your internet connection</p>
           </div>
         </div>
       </section>
