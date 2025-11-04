@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CreditCard, Truck, Shield, CheckCircle, User } from "lucide-react";
 import { getAddresses, createOrder } from "../api";
+import { trackBeginCheckout, trackPurchase } from '../utils/ga4-simple.js'; // Import GA4 functions
 
 const Checkout = ({ cart, calculateTotal, clearCart }) => {
   const navigate = useNavigate();
@@ -40,6 +41,22 @@ const Checkout = ({ cart, calculateTotal, clearCart }) => {
       setIsGuest(true);
     }
   }, []);
+
+  // Track begin_checkout when component loads with items
+  useEffect(() => {
+    if (processedCart.length > 0) {
+      const cartItemsForGA4 = processedCart.map(item => ({
+        id: item.id || item._id,
+        title: item.title,
+        price: item.price || item.currentPrice || item.originalPrice || 0,
+        quantity: item.quantity || 1,
+        category: item.category || 'General',
+        selectedOptions: item.selectedOptions || {}
+      }));
+      
+      trackBeginCheckout(cartItemsForGA4);
+    }
+  }, [processedCart]);
 
   // Helper function to get image URL
   const getImageUrl = (imageObj) => {
@@ -221,6 +238,7 @@ const Checkout = ({ cart, calculateTotal, clearCart }) => {
         quantity: item.quantity || 1,
         image: item.processedImage || item.image,
         name: item.title,
+        category: item.category || 'General',
         // NEW: Include selected options in order items
         selectedOptions: item.selectedOptions || null
       }));
@@ -255,6 +273,27 @@ const Checkout = ({ cart, calculateTotal, clearCart }) => {
 
       // Create order via API
       const newOrder = await createOrder(orderData);
+      
+      // TRACK PURCHASE IN GA4
+      try {
+        const purchaseData = {
+          _id: newOrder._id,
+          orderNumber: newOrder.orderNumber,
+          totalAmount: newOrder.totalAmount || totalPrice,
+          totalPrice: newOrder.totalPrice || totalPrice,
+          taxAmount: newOrder.taxAmount || taxPrice,
+          shippingCost: newOrder.shippingCost || shippingPrice,
+          paymentMethod: newOrder.paymentMethod || formData.paymentMethod,
+          items: newOrder.items || orderItems,
+          orderItems: newOrder.orderItems || orderItems
+        };
+        
+        trackPurchase(purchaseData);
+        console.log('GA4: Purchase tracked successfully');
+      } catch (gaError) {
+        console.error('GA4: Error tracking purchase:', gaError);
+        // Don't block the order flow if GA4 tracking fails
+      }
       
       // Set success state
       setCreatedOrder(newOrder);

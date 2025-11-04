@@ -6,7 +6,7 @@ import { addToWishlist, removeFromWishlist, getWishlist, getActiveSales } from "
 import ProductReviews from '../components/reviews/ProductReviews';
 import ReviewImporter from '../components/ReviewImporter';
 import { getProductReviews } from '../api';
-import { analytics } from '../utils/analytics';
+import { trackProductView, trackAddToCart, trackWishlist, trackShare } from '../utils/ga4-simple.js';
 
 // Sale Timer Component
 // Compact Professional Version
@@ -131,7 +131,6 @@ const ProductDetailPage = ({ products = [], onAddToCart, cart = [], user }) => {
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   
-  const hasTrackedView = useRef(false);
   const currentProductId = useRef(null);
   const reviewsSectionRef = useRef(null);
 
@@ -235,7 +234,7 @@ const checkSaleStatus = async (product) => {
     fetchActiveSales();
   }, []);
 
-  // Consolidated useEffect for product loading and tracking
+  // Consolidated useEffect for product loading
   useEffect(() => {
     const foundProduct = products.find(p => p._id === id || p.id === id);
     
@@ -253,19 +252,7 @@ const checkSaleStatus = async (product) => {
         setSelectedOptions(initialOptions);
       }
       
-      // TRACK PRODUCT VIEW - Only track once per product session
-      if (currentProductId.current !== id) {
-        hasTrackedView.current = false;
-        currentProductId.current = id;
-      }
-      
-      if (!hasTrackedView.current && foundProduct._id) {
-        console.log('📊 Tracking product view for:', foundProduct.title);
-        analytics.trackProductView(foundProduct);
-        hasTrackedView.current = true;
-        
-        sessionStorage.setItem(`tracked_${foundProduct._id}`, 'true');
-      }
+      currentProductId.current = id;
       
       // Check wishlist status only if user is logged in
       if (user) {
@@ -477,6 +464,9 @@ const checkSaleStatus = async (product) => {
       onAddToCart(cartItem);
     }
 
+    // ✅ MOVE GA4 TRACKING HERE - AFTER SUCCESSFUL ADD TO CART
+    trackAddToCart(product, quantity, selectedOptions);
+
     if (showSuccess) {
       setShowCartSuccess(true);
       setTimeout(() => {
@@ -531,32 +521,36 @@ const handleBuyNow = () => {
   };
 
   const handleWishlistToggle = async () => {
-    if (!product) return;
-    
-    if (!userD) {
-      setShowLoginPrompt(true);
-      return;
+  if (!product) return;
+  
+  if (!userD) {
+    setShowLoginPrompt(true);
+    return;
+  }
+  
+  setWishlistLoading(true);
+  try {
+    if (isInWishlist) {
+      await removeFromWishlist(product._id);
+      setIsInWishlist(false);
+      // GA4 Tracking - Add this line
+      trackWishlist(product, 'remove');
+    } else {
+      await addToWishlist(product._id);
+      setIsInWishlist(true);
+      setShowWishlistSuccess(true);
+      // GA4 Tracking - Add this line
+      trackWishlist(product, 'add');
+      setTimeout(() => {
+        setShowWishlistSuccess(false);
+      }, 3000);
     }
-    
-    setWishlistLoading(true);
-    try {
-      if (isInWishlist) {
-        await removeFromWishlist(product._id);
-        setIsInWishlist(false);
-      } else {
-        await addToWishlist(product._id);
-        setIsInWishlist(true);
-        setShowWishlistSuccess(true);
-        setTimeout(() => {
-          setShowWishlistSuccess(false);
-        }, 3000);
-      }
-    } catch (error) {
-      alert(error.message || "Error updating wishlist");
-    } finally {
-      setWishlistLoading(false);
-    }
-  };
+  } catch (error) {
+    alert(error.message || "Error updating wishlist");
+  } finally {
+    setWishlistLoading(false);
+  }
+};
 
   const handleViewWishlist = () => {
     navigate('/profile?tab=wishlist');
@@ -564,23 +558,26 @@ const handleBuyNow = () => {
 
   // Share functionality
   const handleShare = async () => {
-    const shareUrl = window.location.href;
-    const shareText = `Check out ${product.title} - ${formatPrice(product.currentPrice || product.price)}`;
+  const shareUrl = window.location.href;
+  const shareText = `Check out ${product.title} - ${formatPrice(product.currentPrice || product.price)}`;
 
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: product.title,
-          text: shareText,
-          url: shareUrl,
-        });
-      } else {
-        setShowShareOptions(true);
-      }
-    } catch (error) {
-      console.log('Share canceled or not supported');
+  // GA4 Tracking - Add this line
+  trackShare(product, 'direct');
+
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: product.title,
+        text: shareText,
+        url: shareUrl,
+      });
+    } else {
+      setShowShareOptions(true);
     }
-  };
+  } catch (error) {
+    console.log('Share canceled or not supported');
+  }
+};
 
   const copyToClipboard = async () => {
     try {
@@ -708,6 +705,12 @@ const handleBuyNow = () => {
       setSelectedVideo(index);
     }
   };
+
+  useEffect(() => {
+  if (product) {
+    trackProductView(product);
+  }
+}, [product]);
 
   if (loading || !product) {
     return (

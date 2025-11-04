@@ -3,6 +3,73 @@ import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import { sendNewOrderNotification } from "../services/emailService.js";
 
+// In your orderController.js - Fix the trackPurchaseBackend function
+const trackPurchaseBackend = async (order) => {
+  try {
+    const measurementId = process.env.VITE_GA_MEASUREMENT_ID;
+    const apiSecret = process.env.GA4_API_SECRET;
+    
+    if (!measurementId || !apiSecret) {
+      console.log('GA4: Missing measurement ID or API secret');
+      return;
+    }
+
+    // Validate API Secret format
+    if (apiSecret.length < 20) {
+      console.error('GA4: Invalid API Secret format');
+      return;
+    }
+    
+    // Prepare items for GA4
+    const ga4Items = (order.orderItems || []).map(item => ({
+      item_id: item.product?._id?.toString() || item.product?.toString() || `product_${Math.random().toString(36).substr(2, 9)}`,
+      item_name: item.name || 'Unknown Product',
+      item_category: item.category || 'General',
+      price: item.price || 0,
+      quantity: item.qty || 1
+    }));
+
+    const eventData = {
+      client_id: order.user ? `user_${order.user._id}` : `guest_${order._id}`,
+      user_id: order.user ? order.user._id.toString() : undefined,
+      events: [{
+        name: 'purchase',
+        params: {
+          transaction_id: order._id.toString(),
+          order_number: order.orderNumber,
+          currency: 'PKR',
+          value: order.totalPrice || 0,
+          tax: order.taxPrice || 0,
+          shipping: order.shippingPrice || 0,
+          coupon: order.couponCode || '',
+          payment_method: order.paymentMethod || 'cod',
+          order_status: order.orderStatus,
+          items: ga4Items
+        }
+      }]
+    };
+
+    console.log('GA4: Sending purchase event for order:', order.orderNumber);
+    
+    const response = await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData)
+    });
+
+    if (!response.ok) {
+      console.error('GA4: Failed to send event. Status:', response.status);
+    } else {
+      console.log('GA4: Purchase event sent successfully');
+    }
+    
+  } catch (error) {
+    console.error('GA4: Backend tracking failed:', error.message);
+  }
+};
+
 // Create order from cart OR from direct items (supports guest orders)
 export const createOrder = asyncHandler(async (req, res) => {
   const user = req.user; // This might be undefined for guest orders
@@ -42,6 +109,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       image: item.processedImage || item.image || '/placeholder.png',
       price: item.price || item.currentPrice || item.originalPrice || 0,
       qty: item.quantity || 1,
+      category: item.category || 'General',
       // FIXED: Handle selectedOptions properly - check multiple possible field names
       selectedOptions: item.selectedOptions || item.options || item.variants || {}
     }));
@@ -65,6 +133,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       image: i.product.images?.[0]?.url || '/placeholder.png',
       price: i.price,
       qty: i.qty,
+      category: i.product.category || 'General',
       // FIXED: Include selectedOptions from cart items for logged-in users
       selectedOptions: i.selectedOptions || i.options || {}
     }));
@@ -117,7 +186,58 @@ export const createOrder = asyncHandler(async (req, res) => {
     console.error('❌ Failed to send order notification email:', emailError);
   }
 
+  // Track initial order creation in GA4 (but not as purchase yet)
+  try {
+    await trackPurchaseBackend(createdOrder);
+  } catch (gaError) {
+    console.error('GA4: Error tracking order creation:', gaError);
+  }
+
   res.status(201).json(createdOrder);
+});
+
+// Admin: update order status - UPDATED: Track purchase when order is delivered
+export const updateOrderStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { orderStatus, trackingNumber } = req.body;
+  
+  const order = await Order.findById(id);
+  if (!order) { 
+    res.status(404); 
+    throw new Error("Order not found"); 
+  }
+
+  const previousStatus = order.orderStatus;
+  
+  if (orderStatus) order.orderStatus = orderStatus;
+  if (trackingNumber) order.trackingNumber = trackingNumber;
+  
+  if (orderStatus === "delivered") {
+    order.isDelivered = true;
+    order.deliveredAt = Date.now();
+    
+    // TRACK PURCHASE IN GA4 WHEN ORDER IS DELIVERED
+    try {
+      console.log('GA4: Order delivered, tracking purchase...');
+      await trackPurchaseBackend(order);
+    } catch (gaError) {
+      console.error('GA4: Error tracking delivered order:', gaError);
+    }
+  }
+
+  const updated = await order.save();
+  
+  // Also track if status changed from pending/confirmed to delivered
+  if ((previousStatus === 'pending' || previousStatus === 'confirmed') && orderStatus === 'delivered') {
+    try {
+      console.log('GA4: Status changed to delivered, tracking purchase...');
+      await trackPurchaseBackend(updated);
+    } catch (gaError) {
+      console.error('GA4: Error tracking status change to delivered:', gaError);
+    }
+  }
+
+  res.json(updated);
 });
 
 // Get orders for user (supports guest orders by email)
@@ -162,7 +282,7 @@ export const getOrderDetails = asyncHandler(async (req, res) => {
     .populate("user", "name email")
     .populate({
       path: "orderItems.product",
-      select: "title images price" // Only select necessary fields
+      select: "title images price category" // Added category for GA4
     });
 
   if (!order) {
@@ -185,7 +305,8 @@ export const getOrderDetails = asyncHandler(async (req, res) => {
     ...order.toObject(),
     orderItems: order.orderItems.map(item => ({
       ...item,
-      selectedOptions: item.selectedOptions || {}
+      selectedOptions: item.selectedOptions || {},
+      category: item.category || 'General'
     }))
   };
 
@@ -218,7 +339,8 @@ export const getGuestOrder = asyncHandler(async (req, res) => {
     ...order.toObject(),
     orderItems: order.orderItems.map(item => ({
       ...item,
-      selectedOptions: item.selectedOptions || {}
+      selectedOptions: item.selectedOptions || {},
+      category: item.category || 'General'
     }))
   };
 
@@ -274,7 +396,8 @@ export const getAllOrders = asyncHandler(async (req, res) => {
     ...order.toObject(),
     orderItems: order.orderItems.map(item => ({
       ...item,
-      selectedOptions: item.selectedOptions || {}
+      selectedOptions: item.selectedOptions || {},
+      category: item.category || 'General'
     }))
   }));
 
@@ -328,7 +451,8 @@ export const getFilteredOrders = asyncHandler(async (req, res) => {
     ...order.toObject(),
     orderItems: order.orderItems.map(item => ({
       ...item,
-      selectedOptions: item.selectedOptions || {}
+      selectedOptions: item.selectedOptions || {},
+      category: item.category || 'General'
     }))
   }));
 
@@ -340,25 +464,41 @@ export const getFilteredOrders = asyncHandler(async (req, res) => {
   });
 });
 
-// Admin: update order status
-export const updateOrderStatus = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { orderStatus, trackingNumber } = req.body;
-  
-  const order = await Order.findById(id);
-  if (!order) { 
-    res.status(404); 
-    throw new Error("Order not found"); 
+// Additional function to track delivered orders (for manual triggering if needed)
+export const trackDeliveredOrders = asyncHandler(async (req, res) => {
+  if (!req.user?.isAdmin) {
+    res.status(401);
+    throw new Error("Not authorized");
   }
 
-  if (orderStatus) order.orderStatus = orderStatus;
-  if (trackingNumber) order.trackingNumber = trackingNumber;
-  
-  if (orderStatus === "delivered") {
-    order.isDelivered = true;
-    order.deliveredAt = Date.now();
+  // Find all delivered orders that haven't been tracked yet
+  const deliveredOrders = await Order.find({ 
+    orderStatus: 'delivered',
+    ga4Tracked: { $ne: true } // Add this field to your Order model if you want to track which orders have been sent to GA4
+  }).populate('user', 'name email');
+
+  let trackedCount = 0;
+  let errors = [];
+
+  for (const order of deliveredOrders) {
+    try {
+      await trackPurchaseBackend(order);
+      
+      // Mark as tracked (optional - add ga4Tracked field to your Order model)
+      // order.ga4Tracked = true;
+      // await order.save();
+      
+      trackedCount++;
+      console.log(`GA4: Tracked delivered order: ${order.orderNumber}`);
+    } catch (error) {
+      errors.push({ order: order.orderNumber, error: error.message });
+      console.error(`GA4: Failed to track order ${order.orderNumber}:`, error);
+    }
   }
 
-  const updated = await order.save();
-  res.json(updated);
+  res.json({
+    message: `GA4 tracking completed`,
+    tracked: trackedCount,
+    errors: errors.length > 0 ? errors : undefined
+  });
 });

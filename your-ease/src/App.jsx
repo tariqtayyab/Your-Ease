@@ -15,9 +15,6 @@ import WhatsAppButton from './components/WhatsAppButton';
 import ProductDetailPage from "./pages/ProductDetailPage";
 import Search from "./pages/Search";
 import SEOHead from "./components/SEOHead";
-import { analytics } from "./utils/analytics";
-import AdminAnalytics from "./pages/AdminAnalytics";
-// import GDPRConsent from './components/GDPRConsent';
 import TrackOrder from "./pages/TrackOrder";
 import Shipping from "./pages/Shipping";
 import FAQ from "./pages/FAQ";
@@ -27,6 +24,7 @@ import Contact from "./pages/Contact";
 import CategoryPage from "./pages/CategoryPage";
 import AboutPage from "./pages/AboutPage";
 import Policy from "./pages/PolicyPage";
+import { trackPageView } from './utils/ga4-simple.js';
 
 // ScrollToTop component to reset scroll position on route change
 const ScrollToTop = () => {
@@ -45,9 +43,12 @@ function App() {
   const [user, setUser] = useState(null);
   const location = useLocation();
 
-  const API_URL = import.meta.env.VITE_API_URL;
+   useEffect(() => {
+    // Track page view when route changes
+    trackPageView(document.title);
+  }, [location.pathname]);
 
-  window.analytics = analytics;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Disable browser's scroll restoration
   useEffect(() => {
@@ -77,18 +78,6 @@ function App() {
     localStorage.setItem('yourEaseCart', JSON.stringify(cart));
   }, [cart]);
 
-  useEffect(() => {
-  // Set user ID for analytics if user is logged in
-  if (user) {
-    analytics.setUserId(user._id);
-  }
-}, [user]);
-
-  // Track initial page view
-  useEffect(() => {
-    analytics.trackPageView('homepage');
-  }, []);
-
   // Fetch products from your backend
   useEffect(() => {
     const fetchProducts = async () => {
@@ -106,9 +95,6 @@ function App() {
 
   // Add to cart function - IMPROVED: Better selectedOptions handling
   const handleAddToCart = (product) => {
-    // Track add to cart event
-    analytics.trackAddToCart(product, product.quantity || 1);
-    
     setCart(prevCart => {
       const existingItem = prevCart.find(item => {
         // Check if it's the same product with the same options
@@ -165,11 +151,6 @@ function App() {
 
   // Remove from cart
   const removeFromCart = (productId) => {
-    const product = cart.find(item => item.id === productId || item._id === productId);
-    if (product) {
-      analytics.trackRemoveFromCart(product, product.quantity);
-    }
-    
     setCart(prevCart => 
       prevCart.filter(item => item.id !== productId && item._id !== productId)
     );
@@ -199,12 +180,10 @@ function App() {
       
       <Navbar cartCount={calculateTotalItems()} />
       <WhatsAppButton />
-      {/* <GDPRConsent /> */}
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home products={products} onAddToCart={handleAddToCart} />} /> 
         <Route path="/admin"element={<AdminRoute><AdminPanel /></AdminRoute>}/>        
-        <Route path="/admin/analytics/*"element={<AdminRoute><AdminAnalytics /></AdminRoute>}/>
         <Route path="/product/:id" element={<ProductDetailPage products={products} onAddToCart={handleAddToCart} cart={cart} />} />
         <Route path="/category/:categoryId" element={<CategoryPage onAddToCart={handleAddToCart} />} />
         <Route path="/track-order" element={<TrackOrder />} />

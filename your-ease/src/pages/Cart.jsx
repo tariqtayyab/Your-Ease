@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
+import { trackBeginCheckout, trackRemoveFromCart, trackAddToCart } from '../utils/ga4-simple.js';
 
 const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
   const navigate = useNavigate();
@@ -54,7 +55,6 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
       }
     };
 
-    // FIX: Changed from loadCartFromStorage to loadCartFromLocalStorage
     loadCartFromLocalStorage();
   }, []);
 
@@ -69,33 +69,56 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
 
   // Local storage update functions
   const handleUpdateQuantity = (itemId, newQuantity) => {
-    if (newQuantity <= 0) {
-      handleRemoveFromCart(itemId);
-      return;
+  const oldItem = localCart.find(item => (item.id === itemId || item._id === itemId));
+  if (!oldItem) return;
+
+  const oldQuantity = oldItem.quantity;
+
+  if (newQuantity <= 0) {
+    handleRemoveFromCart(itemId);
+    return;
+  }
+
+  try {
+    const updatedCart = localCart.map(item => 
+      (item.id === itemId || item._id === itemId) 
+        ? { ...item, quantity: newQuantity }
+        : item
+    );
+
+    // Update localStorage and state
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    setLocalCart(updatedCart);
+
+    // GA4 Tracking - Track quantity changes
+    if (newQuantity > oldQuantity) {
+      const addedQuantity = newQuantity - oldQuantity;
+      trackAddToCart(oldItem, addedQuantity);
+    } else if (newQuantity < oldQuantity) {
+      const removedQuantity = oldQuantity - newQuantity;
+      trackRemoveFromCart(oldItem, removedQuantity);
     }
 
-    try {
-      const updatedCart = localCart.map(item => 
-        (item.id === itemId || item._id === itemId) 
-          ? { ...item, quantity: newQuantity }
-          : item
-      );
-
-      // Update localStorage and state
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      setLocalCart(updatedCart);
-
-      // Call parent function if it exists
-      if (updateQuantity) {
-        updateQuantity(itemId, newQuantity);
-      }
-    } catch (error) {
-      console.error("Error updating quantity:", error);
+    // Call parent function if it exists
+    if (updateQuantity) {
+      updateQuantity(itemId, newQuantity);
     }
-  };
+  } catch (error) {
+    console.error("Error updating quantity:", error);
+  }
+};
 
   const handleRemoveFromCart = (itemId) => {
     try {
+      const itemToRemove = localCart.find(item => 
+        item.id === itemId || item._id === itemId
+      );
+      
+      // GA4 Tracking - Track remove from cart
+      if (itemToRemove) {
+        trackRemoveFromCart(itemToRemove, itemToRemove.quantity);
+      }
+
       const updatedCart = localCart.filter(item => 
         item.id !== itemId && item._id !== itemId
       );
@@ -111,6 +134,12 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
     } catch (error) {
       console.error("Error removing item from cart:", error);
     }
+  };
+
+  // GA4 Tracking - Track begin checkout
+  const handleCheckout = () => {
+    trackBeginCheckout(localCart);
+    navigate('/checkout');
   };
 
   const handleCalculateTotal = () => {
@@ -339,7 +368,7 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
 
                 {/* Checkout Button */}
                 <button
-                  onClick={() => navigate('/checkout')}
+                  onClick={handleCheckout}
                   className="w-full bg-teal-600 text-white py-3 sm:py-4 rounded-xl font-semibold hover:bg-teal-700 transition-colors shadow-lg mb-3 sm:mb-4 text-sm sm:text-base"
                 >
                   Proceed to Checkout

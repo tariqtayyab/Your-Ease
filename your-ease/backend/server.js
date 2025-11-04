@@ -21,8 +21,6 @@
   import paymentRoutes from './routes/paymentRoutes.js';
   import reviewRoutes from "./routes/reviewRoutes.js";
   import importRoutes from './routes/importRoutes.js';
-  import analyticsRoutes from './routes/analyticsRoutes.js';
-  import { scheduleDataCleanup } from "./controllers/dataRetentionController.js"; 
   import contactRoutes from './routes/contactRoutes.js';
   import saleRoutes from './routes/saleRoutes.js';
   
@@ -52,7 +50,6 @@
   app.use("/api", reviewRoutes);
   app.use('/api/payments', paymentRoutes);
   app.use("/api/categories", categoryRoutes);
-  app.use('/api/analytics', analyticsRoutes);
   app.use("/api/import", importRoutes);
   app.use("/api/sales", saleRoutes);
   app.use("/api/banners", bannerRoutes); // <-- dedicated route
@@ -74,7 +71,6 @@
     .connect(process.env.MONGO_URI)
     .then(() => {
       console.log("✅ MongoDB Connected Successfully");
-      scheduleDataCleanup();
     console.log("✅ Data retention scheduler started");
       app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
     })

@@ -37,7 +37,6 @@ import {
   Home,
   Building,
   Navigation,
-  BarChart3,
   Image,
   List,
   RefreshCw,
@@ -49,7 +48,6 @@ import {
 import OrderManagement from "../components/OrderManagement";
 
 // Import your admin components
-import AnalyticsDashboard from "../components/AnalyticsDashboard";
 import BannerAdmin from "../pages/admin/BannerAdmin";
 import CategoriesAdmin from "../pages/admin/CategoriesAdmin";
 import SalesAdmin from "../pages/admin/SalesAdmin";
@@ -587,12 +585,11 @@ const Account = () => {
     ];
 
     const adminItems = [
-      { id: "dashboard", label: "Analytics", icon: BarChart3 },
-  { id: "orders", label: "Order Management", icon: ShoppingBag },
-  { id: "sales", label: "Sales Management", icon: Tag }, // NEW: Added sales management
-  { id: "banners", label: "Banner Management", icon: Image },
-  { id: "categories", label: "Category Management", icon: List },
-  { id: "settings", label: "Account Settings", icon: Settings },
+      { id: "orders", label: "Order Management", icon: ShoppingBag },
+      { id: "sales", label: "Sales Management", icon: Tag },
+      { id: "banners", label: "Banner Management", icon: Image },
+      { id: "categories", label: "Category Management", icon: List },
+      { id: "settings", label: "Account Settings", icon: Settings },
     ];
 
     return user?.isAdmin ? adminItems : userItems;
@@ -777,8 +774,18 @@ const Account = () => {
               {activeTab === "dashboard" && (
                 <div className="space-y-6">
                   {user.isAdmin ? (
-                    // Admin Analytics Dashboard
-                    <AnalyticsDashboard />
+                    // Admin Dashboard - Simple Welcome
+                    <div className="bg-white rounded-2xl shadow-sm p-8">
+                      <div className="text-center">
+                        <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <User className="w-10 h-10 text-purple-600" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Admin Dashboard</h2>
+                        <p className="text-gray-600 mb-6">
+                          Welcome to your store management dashboard. Use the navigation to manage orders, sales, banners, and categories.
+                        </p>
+                      </div>
+                    </div>
                   ) : (
                     // User Dashboard
                     <>
