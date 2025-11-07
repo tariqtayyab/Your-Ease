@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ProductCard from "./ProductCard";
 import { Link } from "react-router-dom";
+import { apiCache } from "../utils/apiCache"; 
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -20,19 +21,34 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const { data } = await axios.get(`${API_BASE}/api/categories`);
-        setCategories(data || []);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      } finally {
-        setLoading(false);
-      }
+ useEffect(() => {
+  async function fetchCategories() {
+    const cacheKey = 'categories';
+    const cachedData = apiCache.get(cacheKey);
+    
+    // Return cached data if available
+    if (cachedData) {
+      setCategories(cachedData);
+      setLoading(false);
+      return;
     }
-    fetchCategories();
-  }, []);
+
+    try {
+      const { data } = await axios.get(`${API_BASE}/api/categories`);
+      const categoriesData = data || [];
+      setCategories(categoriesData);
+      
+      // Cache the successful response
+      apiCache.set(cacheKey, categoriesData);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+  fetchCategories();
+}, []);
 
   // Function to get products to display based on category type and screen size
   const getProductsToDisplay = (category) => {
@@ -68,7 +84,7 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
 
                 {/* Products Grid Skeleton */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-                  {[...Array(6)].map((_, productIndex) => (
+                  {[...Array(4)].map((_, productIndex) => (
                     <div key={productIndex} className="animate-pulse">
                       <div className="bg-gray-300 rounded-2xl h-48 md:h-56 mb-3"></div>
                       <div className="h-4 bg-gray-300 rounded mb-2"></div>
@@ -123,17 +139,34 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
   });
 
   if (sortedCategories.length === 0) {
-    return (
-      <section className="bg-gray-50 py-12 md:py-16">
+   return (
+      <section className="bg-gradient-to-br from-gray-50 to-blue-50 py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center py-12">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-200 rounded-full flex items-center justify-center">
-              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Categories Available</h3>
-            <p className="text-gray-500">Please check your internet connection</p>
+          <div className="space-y-16">
+            {[...Array(2)].map((_, categoryIndex) => (
+              <div key={categoryIndex} className="category-section bg-white rounded-3xl shadow-lg px-3 py-6 md:p-8 border border-gray-100 animate-pulse">
+                {/* Category Header Skeleton */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10 gap-4">
+                  <div className="text-center sm:text-left">
+                    <div className="h-8 md:h-10 bg-gray-300 rounded-lg w-48 md:w-64 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-32"></div>
+                  </div>
+                  <div className="h-12 bg-gray-300 rounded-xl w-32"></div>
+                </div>
+
+                {/* Products Grid Skeleton */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+                  {[...Array(4)].map((_, productIndex) => (
+                    <div key={productIndex} className="animate-pulse">
+                      <div className="bg-gray-300 rounded-2xl h-48 md:h-56 mb-3"></div>
+                      <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                      <div className="h-8 bg-gray-300 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

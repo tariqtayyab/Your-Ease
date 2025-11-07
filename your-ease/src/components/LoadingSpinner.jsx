@@ -18,6 +18,7 @@ const LoadingSpinner = () => (
           </div>
         </div>
 
+
         {/* Review Content Skeleton */}
         <div className="mb-3 space-y-2">
           <div className="h-4 bg-gray-300 rounded"></div>

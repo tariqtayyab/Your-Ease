@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Truck } from "lucide-react";
+import OptimizedImage from './OptimizedImage';
 
 const ProductCard = ({ product, onAddToCart, index = 0 }) => {
   const URL_BASE = import.meta.env.VITE_API_BASE_URL;
@@ -131,19 +132,15 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
             )}
             
             {/* 🚀 MAIN OPTIMIZATION: Image with dimensions and priority loading */}
-            <img 
-              src={imageUrl} 
-              alt={safeProduct.title} 
-              width={300}  // ✅ Added explicit width
-              height={300} // ✅ Added explicit height
-              className={`w-full h-full object-contain transition-transform duration-500 hover:scale-105 bg-white ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              loading={loadingPriority} // ✅ First 3 eager, others lazy
-              fetchpriority={index < 2 ? "high" : "auto"} // ✅ Boost LCP for first 2
-              onError={handleImageError}
-              onLoad={handleImageLoad}
-            />
+            <OptimizedImage 
+  src={imageUrl}
+  alt={safeProduct.title}
+  width={400}
+  height={400}
+  lazy={index >= 3} // Lazy load after first 3 images
+  priority={index < 2} // High priority for first 2 images
+  className="transition-transform duration-500 hover:scale-105 bg-white"
+/>
             
             {/* Free Delivery Badge */}
             {safeProduct.freeDelivery && (
@@ -176,14 +173,14 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
         
         {/* Price */}
         <div className="price-container mb-2">
-          <div className="text-teal-600 font-bold text-base">
-            {formatPrice(safeProduct.price)}
-            {safeProduct.oldPrice > safeProduct.price && (
-              <span className="text-gray-400 text-xs ml-2 line-through">
-                {formatPrice(safeProduct.oldPrice)}
-              </span>
-            )}
-          </div>
+          <div className="text-[#1e7a7a] font-bold text-base"> {/* Darker teal */}
+  {formatPrice(safeProduct.price)}
+  {safeProduct.oldPrice > safeProduct.price && (
+    <span className="text-gray-600 text-xs ml-2 line-through"> {/* Darker gray */}
+      {formatPrice(safeProduct.oldPrice)}
+    </span>
+  )}
+</div>
         </div>
         
         {/* Rating */}
@@ -214,12 +211,12 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
                   );
                 })}
             </div>
-            <span className="text-xs text-gray-500">({safeProduct.numReviews})</span>
+            <span className="text-xs text-gray-700">({safeProduct.numReviews})</span> {/* Darker gray */}
           </div>
         ) : (
-          <div className="flex items-center mt-auto text-xs text-gray-500">
-            No reviews yet
-          </div>
+          <div className="flex items-center mt-auto text-xs text-gray-600">
+  No reviews yet
+</div>
         )}
       </div>
     </article>
