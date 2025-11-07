@@ -80,19 +80,26 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
     freeDelivery: product?.freeDelivery !== undefined ? product.freeDelivery : true
   };
 
-  // Get proper image URL
+  // 🚀 OPTIMIZED: Get optimized image URL with proper sizing
   const getImageUrl = (imageObj) => {
     if (!imageObj) return "/placeholder.png";
     
+    let url;
     if (typeof imageObj === 'string') {
-      return imageObj.startsWith('http') ? imageObj : `${URL_BASE}${imageObj}`;
+      url = imageObj.startsWith('http') ? imageObj : `${URL_BASE}${imageObj}`;
+    } else if (imageObj.url) {
+      url = imageObj.url.startsWith('http') ? imageObj.url : `${URL_BASE}${imageObj.url}`;
+    } else {
+      return "/placeholder.png";
     }
     
-    if (imageObj.url) {
-      return imageObj.url.startsWith('http') ? imageObj.url : `${URL_BASE}${imageObj.url}`;
+    // 🚀 OPTIMIZATION: Request mobile-optimized images from Cloudinary
+    if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+      // Add transformation for properly sized images (400x400 instead of 600x600)
+      return url.replace('/upload/', '/upload/w_400,h_400,c_fill/');
     }
     
-    return "/placeholder.png";
+    return url;
   };
 
   const imageUrl = getImageUrl(safeProduct.images[0]);

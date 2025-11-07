@@ -11,7 +11,13 @@ export default function Footer() {
         <div>
           <div className="bg-white p-3 rounded-lg inline-block mb-4">
             <Link to="/">
-              <img src={logo} alt="YourEase logo" className="w-96 md:w-32" />
+              <img 
+  src={logo} 
+  alt="YourEase logo" 
+  className="w-96 md:w-32" 
+  width={384}   // 96 * 4 (Tailwind w-96 = 384px)
+  height={118}  // Proportional height for your logo
+/>
             </Link>
           </div>
           <p className="text-sm leading-relaxed">

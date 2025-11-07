@@ -12,6 +12,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
+    <!-- 🚀 DEFERRED: Google Tag Manager (loads after page is interactive) -->
+    <script>
+      // Initialize dataLayer without blocking
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      
+      // Load GTM after a delay to avoid blocking main thread
+      setTimeout(function() {
+        var script = document.createElement('script');
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-RJGHK4N1MF';
+        script.async = true;
+        document.head.appendChild(script);
+      }, 3000); // Load after 3 seconds
+    </script>
+
     <style>
       body {
         margin: 0;

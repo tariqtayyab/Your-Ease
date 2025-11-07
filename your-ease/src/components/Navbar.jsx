@@ -215,7 +215,13 @@ export default function Navbar() {
           {/* Left: Logo */}
           <div className="flex items-center">
             <Link to="/">
-              <img src={logo} alt="YourEase logo" className="w-28 md:w-32" />
+              <img 
+  src={logo} 
+  alt="YourEase logo" 
+  className="w-28 md:w-32" 
+  width={112}   // 28 * 4 (Tailwind w-28 = 112px)
+  height={35}   // Proportional height for your logo
+/>
             </Link>
           </div>
 
