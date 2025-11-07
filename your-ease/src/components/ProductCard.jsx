@@ -133,25 +133,24 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
             
             {/* 🚀 MAIN OPTIMIZATION: Image with dimensions and priority loading */}
             <OptimizedImage 
-  src={imageUrl}
-  alt={safeProduct.title}
-  width={400}
-  height={400}
-  lazy={index >= 3} // Lazy load after first 3 images
-  priority={index < 2} // High priority for first 2 images
-  className="transition-transform duration-500 hover:scale-105 bg-white"
-/>
+              src={imageUrl}
+              alt={safeProduct.title}
+              width={400}
+              height={400}
+              lazy={index >= 3} // Lazy load after first 3 images
+              priority={index < 2} // High priority for first 2 images
+              className="transition-transform duration-500 hover:scale-105 bg-white"
+            />
             
-           <div className="absolute bottom-2 left-2 h-6"> {/* Always render, reserve space */}
-  {safeProduct.freeDelivery && (
-    <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
-      <div className="flex items-center gap-1">
-        <Truck className="w-3 h-3" />
-        <span className="text-xs font-semibold whitespace-nowrap">Free Delivery</span>
-      </div>
-    </div>
-  )}
-</div>
+            {/* 🚀 FREE DELIVERY BADGE - ALWAYS SHOW (No layout shift) */}
+            <div className="absolute bottom-2 left-2">
+              <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
+                <div className="flex items-center gap-1">
+                  <Truck className="w-3 h-3" />
+                  <span className="text-xs font-semibold whitespace-nowrap">Free Delivery</span>
+                </div>
+              </div>
+            </div>
           </>
         ) : (
           <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
@@ -172,14 +171,14 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
         
         {/* Price */}
         <div className="price-container mb-2">
-          <div className="text-[#1e7a7a] font-bold text-base"> {/* Darker teal */}
-  {formatPrice(safeProduct.price)}
-  {safeProduct.oldPrice > safeProduct.price && (
-    <span className="text-gray-600 text-xs ml-2 line-through"> {/* Darker gray */}
-      {formatPrice(safeProduct.oldPrice)}
-    </span>
-  )}
-</div>
+          <div className="text-[#1e7a7a] font-bold text-base">
+            {formatPrice(safeProduct.price)}
+            {safeProduct.oldPrice > safeProduct.price && (
+              <span className="text-gray-600 text-xs ml-2 line-through">
+                {formatPrice(safeProduct.oldPrice)}
+              </span>
+            )}
+          </div>
         </div>
         
         {/* Rating */}
@@ -210,12 +209,12 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
                   );
                 })}
             </div>
-            <span className="text-xs text-gray-700">({safeProduct.numReviews})</span> {/* Darker gray */}
+            <span className="text-xs text-gray-700">({safeProduct.numReviews})</span>
           </div>
         ) : (
           <div className="flex items-center mt-auto text-xs text-gray-600">
-  No reviews yet
-</div>
+            No reviews yet
+          </div>
         )}
       </div>
     </article>

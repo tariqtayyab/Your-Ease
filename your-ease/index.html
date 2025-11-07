@@ -8,23 +8,71 @@
     
     <!-- 🚀 PERFORMANCE: Preconnect to critical domains -->
     <link rel="preconnect" href="https://res.cloudinary.com">
-    <link rel="preconnect" href="https://your-ease.onrender.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
-    <link rel="dns-prefetch" href="https://your-ease.onrender.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
+    <!-- 🚀 DEFERRED: Google Tag Manager -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      setTimeout(function() {
+        var script = document.createElement('script');
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-RJGHK4N1MF';
+        script.async = true;
+        document.head.appendChild(script);
+      }, 3000);
+    </script>
+
+    <!-- 🚀 CRITICAL CSS (Inlined to prevent render blocking) -->
     <style>
+      /* Base body styles */
       body {
         margin: 0;
         padding: 0;
         background: linear-gradient(135deg, #f9fafb 0%, #eff6ff 100%);
         min-height: 100vh;
       }
+      
+      /* Critical loading animations */
+      .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+      
+      /* Critical layout utilities */
+      .line-clamp-2 {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+      
+      /* Critical product card styles */
+      .product-card {
+        transition: all 0.3s ease;
+      }
+      
+      /* Hide scrollbar for initial load */
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     </style>
+
+    <!-- 🚀 DEFERRED: Non-critical CSS -->
+    <link rel="preload" href="/assets/index-DEzFa4V1.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/assets/index-DEzFa4V1.css"></noscript>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    
-    <!-- 🚀 REMOVE ALL GTM CODE FROM HERE - it's loading twice! -->
   </body>
 </html>
