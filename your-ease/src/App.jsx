@@ -8,6 +8,7 @@ import AdminRoute from "./components/AdminRoute";
 import WhatsAppButton from './components/WhatsAppButton';
 import SEOHead from "./components/SEOHead";
 import { trackPageView } from './utils/ga4-simple.js';
+import { apiCache } from "./utils/apiCache";
 
 // Lazy load all pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -163,20 +164,35 @@ function App() {
     localStorage.setItem('yourEaseCart', JSON.stringify(cart));
   }, [cart]);
 
-  // Fetch products from your backend
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(`${API_URL}/products`);
-        const data = await response.json();
-        setProducts(data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
+useEffect(() => {
+  const fetchProducts = async () => {
+    const cacheKey = 'products';
+    const cachedData = apiCache.get(cacheKey);
+    
+    // Return cached data if available
+    if (cachedData) {
+      setProducts(cachedData);
+      setIsLoading(false);
+      return;
+    }
 
-    fetchProducts();
-  }, [API_URL]);
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_URL}/products`);
+      const data = await response.json();
+      setProducts(data);
+      
+      // Cache the successful response
+      apiCache.set(cacheKey, data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, [API_URL]);
 
   // Add to cart function - IMPROVED: Better selectedOptions handling
   const handleAddToCart = (product) => {

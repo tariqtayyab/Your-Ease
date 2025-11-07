@@ -2,7 +2,7 @@ import { FiFacebook, FiInstagram, FiTwitter, FiYoutube } from "react-icons/fi"
 import { Link } from "react-router-dom";
 
 export default function Footer() {
-  const logo = "https://res.cloudinary.com/dhxydnzrx/image/upload/v1762103256/Your_Ease_png_s4csrk.png"
+  const logo = "https://res.cloudinary.com/dhxydnzrx/image/upload/w_200,h_62,c_fill,q_auto,f_auto/Your_Ease_png_s4csrk.png"
   
   return (
     <footer className="bg-[#2c9ba3] text-white mt-10">

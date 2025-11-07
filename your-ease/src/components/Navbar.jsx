@@ -18,7 +18,7 @@ export default function Navbar() {
   const searchInputRef = useRef(null);
   const categoriesRef = useRef(null);
   const API_URL = import.meta.env.VITE_API_URL;
-  const logo = "https://res.cloudinary.com/dhxydnzrx/image/upload/v1762103256/Your_Ease_png_s4csrk.png"
+  const logo = "https://res.cloudinary.com/dhxydnzrx/image/upload/w_200,h_62,c_fill,q_auto,f_auto/Your_Ease_png_s4csrk.png"
 
   // Close search and categories when clicking outside
   useEffect(() => {

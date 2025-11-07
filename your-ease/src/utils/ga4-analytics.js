@@ -72,7 +72,8 @@ class GA4Analytics {
         resolve(false);
       };
 
-      document.head.appendChild(script);
+      // ✅ FIXED: Append to body instead of head to prevent render blocking
+      document.body.appendChild(script);
     });
   }
 
