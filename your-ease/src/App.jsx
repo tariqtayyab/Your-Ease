@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import BottomNav from "./components/BottomNav";
 import { Routes, Route, useLocation } from "react-router-dom";
-import AdminRoute from "./components/AdminRoute";
+// import AdminRoute from "./components/AdminRoute";
 import WhatsAppButton from './components/WhatsAppButton';
 import SEOHead from "./components/SEOHead";
 import { trackPageView } from './utils/ga4-simple.js';
@@ -298,11 +298,6 @@ useEffect(() => {
           </Suspense>
         } /> 
         
-        <Route path="/admin" element={
-          <Suspense fallback={<PageLoader />}>
-            <AdminRoute><AdminPanel /></AdminRoute>
-          </Suspense>
-        }/>        
         
         <Route path="/product/:id" element={
           <Suspense fallback={<PageLoader />}>

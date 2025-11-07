@@ -142,17 +142,16 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
   className="transition-transform duration-500 hover:scale-105 bg-white"
 />
             
-            {/* Free Delivery Badge */}
-            {safeProduct.freeDelivery && (
-              <div className="absolute bottom-2 left-2">
-                <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
-                  <div className="flex items-center gap-1">
-                    <Truck className="w-3 h-3" />
-                    <span className="text-xs font-semibold whitespace-nowrap">Free Delivery</span>
-                  </div>
-                </div>
-              </div>
-            )}
+           <div className="absolute bottom-2 left-2 h-6"> {/* Always render, reserve space */}
+  {safeProduct.freeDelivery && (
+    <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
+      <div className="flex items-center gap-1">
+        <Truck className="w-3 h-3" />
+        <span className="text-xs font-semibold whitespace-nowrap">Free Delivery</span>
+      </div>
+    </div>
+  )}
+</div>
           </>
         ) : (
           <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
