@@ -1,9 +1,9 @@
-// src/components/ProductCard.jsx - UPDATED (PROFESSIONAL IMAGE HANDLING)
+// src/components/ProductCard.jsx - PERFORMANCE OPTIMIZED (SAME UI)
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Truck } from "lucide-react";
 
-const ProductCard = ({ product, onAddToCart }) => {
+const ProductCard = ({ product, onAddToCart, index = 0 }) => {
   const URL_BASE = import.meta.env.VITE_API_BASE_URL;
   const [imgSrc, setImgSrc] = useState(
     product?.images?.[0] || "/placeholder.png"
@@ -97,6 +97,9 @@ const ProductCard = ({ product, onAddToCart }) => {
 
   const imageUrl = getImageUrl(safeProduct.images[0]);
 
+  // 🚀 PERFORMANCE OPTIMIZATION: Priority loading for first 3 images
+  const loadingPriority = index < 3 ? "eager" : "lazy";
+
   return (
     <article 
       className="product-card bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full cursor-pointer"
@@ -120,14 +123,17 @@ const ProductCard = ({ product, onAddToCart }) => {
               </div>
             )}
             
-            {/* Main Product Image - Professional Handling */}
+            {/* 🚀 MAIN OPTIMIZATION: Image with dimensions and priority loading */}
             <img 
               src={imageUrl} 
               alt={safeProduct.title} 
+              width={300}  // ✅ Added explicit width
+              height={300} // ✅ Added explicit height
               className={`w-full h-full object-contain transition-transform duration-500 hover:scale-105 bg-white ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
-              loading="lazy"
+              loading={loadingPriority} // ✅ First 3 eager, others lazy
+              fetchpriority={index < 2 ? "high" : "auto"} // ✅ Boost LCP for first 2
               onError={handleImageError}
               onLoad={handleImageLoad}
             />
@@ -135,16 +141,14 @@ const ProductCard = ({ product, onAddToCart }) => {
             {/* Free Delivery Badge */}
             {safeProduct.freeDelivery && (
               <div className="absolute bottom-2 left-2">
-  <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
-    <div className="flex items-center gap-1">
-      <Truck className="w-3 h-3" />
-      <span className="text-xs font-semibold whitespace-nowrap">Free Delivery</span>
-    </div>
-  </div>
-</div>
+                <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
+                  <div className="flex items-center gap-1">
+                    <Truck className="w-3 h-3" />
+                    <span className="text-xs font-semibold whitespace-nowrap">Free Delivery</span>
+                  </div>
+                </div>
+              </div>
             )}
-            
-            
           </>
         ) : (
           <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
