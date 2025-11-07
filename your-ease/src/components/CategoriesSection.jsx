@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import ProductCard from "./ProductCard";
 import { Link } from "react-router-dom";
@@ -10,6 +10,7 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const hasFetched = useRef(false); // ✅ ADD THIS
 
   // Move window resize listener to the top - ALWAYS CALL HOOKS IN THE SAME ORDER
   useEffect(() => {
@@ -21,34 +22,40 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
- useEffect(() => {
-  async function fetchCategories() {
-    const cacheKey = 'categories';
-    const cachedData = apiCache.get(cacheKey);
-    
-    // Return cached data if available
-    if (cachedData) {
-      setCategories(cachedData);
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    if (hasFetched.current) return; // ✅ PREVENT MULTIPLE CALLS
+    hasFetched.current = true;
 
-    try {
-      const { data } = await axios.get(`${API_BASE}/api/categories`);
-      const categoriesData = data || [];
-      setCategories(categoriesData);
+    async function fetchCategories() {
+      const cacheKey = 'categories';
+      console.log('🔄 CategoriesSection - Fetching categories...');
       
-      // Cache the successful response
-      apiCache.set(cacheKey, categoriesData);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-      setCategories([]);
-    } finally {
-      setLoading(false);
+      const cachedData = apiCache.get(cacheKey);
+      
+      if (cachedData) {
+        console.log('✅ CategoriesSection - Using cached categories');
+        setCategories(cachedData);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log('📡 CategoriesSection - Making API call for categories');
+        const { data } = await axios.get(`${API_BASE}/api/categories`);
+        const categoriesData = data || [];
+        setCategories(categoriesData);
+        
+        apiCache.set(cacheKey, categoriesData);
+        console.log('✅ CategoriesSection - Categories cached successfully');
+      } catch (error) {
+        console.error("❌ CategoriesSection - Failed to fetch categories:", error);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
-  fetchCategories();
-}, []);
+    fetchCategories();
+  }, []);
 
   // Function to get products to display based on category type and screen size
   const getProductsToDisplay = (category) => {

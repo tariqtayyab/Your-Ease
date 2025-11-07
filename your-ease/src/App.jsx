@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect, lazy, Suspense, useRef } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import BottomNav from "./components/BottomNav";
@@ -129,11 +129,12 @@ function App() {
    const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const location = useLocation();
+   const hasFetched = useRef(false); 
 
-   useEffect(() => {
-    // Track page view when route changes
-    trackPageView(document.title);
-  }, [location.pathname]);
+  //  useEffect(() => {
+  //   // Track page view when route changes
+  //   trackPageView(document.title);
+  // }, [location.pathname]);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -166,34 +167,40 @@ function App() {
   }, [cart]);
 
 useEffect(() => {
-  const fetchProducts = async () => {
-    const cacheKey = 'products';
-    const cachedData = apiCache.get(cacheKey);
-    
-    // Return cached data if available
-    if (cachedData) {
-      setProducts(cachedData);
-      setIsLoading(false);
-      return;
-    }
+    if (hasFetched.current) return; // ✅ PREVENT MULTIPLE CALLS
+    hasFetched.current = true;
 
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_URL}/products`);
-      const data = await response.json();
-      setProducts(data);
+    const fetchProducts = async () => {
+      const cacheKey = 'products';
+      console.log('🔄 App.jsx - Fetching products...');
       
-      // Cache the successful response
-      apiCache.set(cacheKey, data);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      const cachedData = apiCache.get(cacheKey);
+      
+      if (cachedData) {
+        console.log('✅ App.jsx - Using cached products');
+        setProducts(cachedData);
+        setIsLoading(false);
+        return;
+      }
 
-  fetchProducts();
-}, [API_URL]);
+      try {
+        setIsLoading(true);
+        console.log('📡 App.jsx - Making API call for products');
+        const response = await fetch(`${API_URL}/products`);
+        const data = await response.json();
+        setProducts(data);
+        
+        apiCache.set(cacheKey, data);
+        console.log('✅ App.jsx - Products cached successfully');
+      } catch (error) {
+        console.error('❌ App.jsx - Error fetching products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [API_URL]);
 
   // Add to cart function - IMPROVED: Better selectedOptions handling
   const handleAddToCart = (product) => {
