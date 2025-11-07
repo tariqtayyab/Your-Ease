@@ -11,20 +11,46 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Cloudinary storage for both images and videos
+// OPTIMIZED Cloudinary Storage with WebP conversion
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "yourease_categories",
-    allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mov", "avi", "mkv"],
-    resource_type: "auto", // This allows both images and videos
+  params: async (req, file) => {
+    const isVideo = file.mimetype?.startsWith('video/') || 
+                   file.originalname?.toLowerCase().match(/\.(mp4|mov|avi|mkv|webm|wmv|flv|3gp|m4v)$/);
+    
+    if (isVideo) {
+      return {
+        folder: "yourease_categories",
+        resource_type: "video",
+        allowed_formats: ["mp4", "mov", "avi", "mkv", "webm"],
+        transformation: [
+          { quality: "auto", fetch_format: "auto" }
+        ]
+      };
+    } else {
+      // 🔥 ACTUAL WEBP CONVERSION FOR CATEGORY IMAGES
+      return {
+        folder: "yourease_categories",
+        resource_type: "image",
+        allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
+        transformation: [
+          { 
+            width: 800, 
+            height: 800, 
+            crop: "limit",
+            quality: "auto:best", 
+            fetch_format: "webp" 
+          }
+        ]
+      };
+    }
   },
 });
 
 const upload = multer({ 
   storage,
   limits: {
-    fileSize: 100 * 1024 * 1024,
+    fileSize: 50 * 1024 * 1024, // Reduced from 100MB to 50MB for categories
   }
 });
 

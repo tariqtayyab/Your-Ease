@@ -20,14 +20,24 @@ const downloadImage = async (imageUrl) => {
   }
 };
 
-// Upload buffer to Cloudinary
+// Upload buffer to Cloudinary with WebP conversion
 const uploadToCloudinary = (imageBuffer, productId) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: `your-ease/reviews/${productId}`,
-        quality: 'auto',
-        fetch_format: 'auto',
+        resource_type: 'image',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+        transformation: [
+          { 
+            width: 1200, 
+            height: 1200, 
+            crop: "limit",
+            quality: "auto:good", 
+            fetch_format: "webp" 
+          }
+        ],
+        format: 'webp' // Force actual WebP storage
       },
       (error, result) => {
         if (error) reject(error);
@@ -39,19 +49,20 @@ const uploadToCloudinary = (imageBuffer, productId) => {
   });
 };
 
-// Process single image (download + upload)
+// Process single image (download + upload with WebP conversion)
 const processImage = async (imageUrl, productId) => {
   try {
     console.log(`⬇️ Downloading: ${imageUrl.substring(0, 50)}...`);
     const imageBuffer = await downloadImage(imageUrl);
     
-    console.log(`⬆️ Uploading to Cloudinary...`);
+    console.log(`⬆️ Uploading to Cloudinary as WebP...`);
     const uploadResult = await uploadToCloudinary(imageBuffer, productId);
     
     return {
       url: uploadResult.secure_url,
       public_id: uploadResult.public_id,
-      type: 'image'
+      type: 'image',
+      format: 'webp' // Mark as WebP format
     };
   } catch (error) {
     console.error(`❌ Image processing failed: ${error.message}`);
@@ -75,7 +86,7 @@ const importDarazReviews = asyncHandler(async (req, res) => {
     const errors = [];
     let totalImagesProcessed = 0;
 
-    console.log(`🚀 Starting import of ${reviewsData.reviews.length} reviews...`);
+    console.log(`🚀 Starting import of ${reviewsData.reviews.length} reviews with WebP conversion...`);
 
     // Process each review from scraped data
     for (const [index, scrapedReview] of reviewsData.reviews.entries()) {
@@ -95,17 +106,17 @@ const importDarazReviews = asyncHandler(async (req, res) => {
           continue;
         }
 
-        // Process all images for this review
+        // Process all images for this review with WebP conversion
         const media = [];
         if (scrapedReview.images && scrapedReview.images.length > 0) {
-          console.log(`🖼️ Processing ${scrapedReview.images.length} images...`);
+          console.log(`🖼️ Processing ${scrapedReview.images.length} images as WebP...`);
           
           for (const [imgIndex, image] of scrapedReview.images.entries()) {
             const processedImage = await processImage(image.url, productId);
             if (processedImage) {
               media.push(processedImage);
               totalImagesProcessed++;
-              console.log(`✅ Image ${imgIndex + 1}/${scrapedReview.images.length} uploaded`);
+              console.log(`✅ Image ${imgIndex + 1}/${scrapedReview.images.length} converted to WebP`);
             } else {
               console.log(`❌ Failed to process image ${imgIndex + 1}`);
             }
@@ -115,21 +126,19 @@ const importDarazReviews = asyncHandler(async (req, res) => {
           }
         }
 
-        // ✅ ONLY STORE FIELDS YOU ALREADY HAVE - NO DARAZ-SPECIFIC FIELDS
-        // Create review in database
-// Create review in database (for imported Daraz reviews)
-const newReview = await Review.create({
-  product: productId,
-  user: scrapedReview.username,
-  rating: scrapedReview.rating,
-  comment: scrapedReview.text,
-  media: media,
-  reviewDate: scrapedReview.date, // Store Daraz date
-  
-});
+        // Create review in database (for imported Daraz reviews)
+        const newReview = await Review.create({
+          product: productId,
+          user: scrapedReview.username,
+          rating: scrapedReview.rating,
+          comment: scrapedReview.text,
+          media: media,
+          reviewDate: scrapedReview.date, // Store Daraz date
+          isImported: true // Mark as imported review
+        });
 
         importedReviews.push(newReview);
-        console.log(`✅ Review imported successfully (${media.length} images)`);
+        console.log(`✅ Review imported successfully (${media.length} WebP images)`);
 
       } catch (reviewError) {
         const errorMsg = `Failed to import review from ${scrapedReview.username}: ${reviewError.message}`;
@@ -141,18 +150,20 @@ const newReview = await Review.create({
     // Update product rating stats
     await updateProductRatingStats(productId);
 
-    console.log(`🎉 Import completed! ${importedReviews.length} reviews, ${totalImagesProcessed} images`);
+    console.log(`🎉 Import completed! ${importedReviews.length} reviews, ${totalImagesProcessed} WebP images`);
 
     res.status(200).json({
-      message: 'Reviews import completed',
+      message: 'Reviews import completed with WebP conversion',
       imported: importedReviews.length,
       totalImages: totalImagesProcessed,
       errors: errors.length,
+      imageFormat: 'webp', // Indicate images are stored as WebP
       details: {
         importedReviews: importedReviews.map(r => ({
           id: r._id,
           rating: r.rating,
-          images: r.media.length
+          images: r.media.length,
+          format: 'webp'
         })),
         errors: errors
       }

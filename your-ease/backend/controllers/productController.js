@@ -1,8 +1,50 @@
-// controllers/productController.js - UPDATED WITH ACTIVE SALE POPULATION
 import asyncHandler from "express-async-handler";
 import Product from "../models/productModel.js";
 import Category from "../models/Category.js";
 import Review from "../models/Review.js";
+
+// OPTIMIZED: Generate multiple optimized image URLs from Cloudinary
+const generateOptimizedImageUrls = (cloudinaryPath) => {
+  // Extract public ID without existing transformations
+  const parts = cloudinaryPath.split('/upload/');
+  if (parts.length !== 2) return { original: cloudinaryPath };
+  
+  const publicId = parts[1];
+  
+  return {
+    original: cloudinaryPath,
+    webp: `https://res.cloudinary.com/dhxydnzrx/image/upload/f_webp,q_auto:good/${publicId}`,
+    webp_medium: `https://res.cloudinary.com/dhxydnzrx/image/upload/w_600,h_600,c_limit,f_webp,q_auto:good/${publicId}`,
+    webp_thumbnail: `https://res.cloudinary.com/dhxydnzrx/image/upload/w_300,h_300,c_fill,f_webp,q_auto:good/${publicId}`,
+    fallback_jpeg: `https://res.cloudinary.com/dhxydnzrx/image/upload/f_jpg,q_auto:good/${publicId}`
+  };
+};
+
+// ENHANCED: Process uploaded files with ACTUAL WebP conversion
+const processUploadedFiles = (files) => {
+  return files.map(file => {
+    const isVideo = file.resource_type === 'video' || 
+                   file.mimetype?.startsWith('video/') ||
+                   file.originalname?.toLowerCase().match(/\.(mp4|mov|avi|mkv|webm|wmv|flv|3gp|m4v)$/);
+    
+    if (isVideo) {
+      return {
+        url: file.path,
+        type: 'video'
+      };
+    } else {
+      // With actual conversion, file is already stored as WebP
+      const optimizedUrls = generateOptimizedImageUrls(file.path);
+      
+      return {
+        url: file.path, // Direct WebP URL (already converted during upload)
+        type: 'image',
+        format: 'webp', // Mark as actual WebP file
+        optimized_urls: optimizedUrls // Keep multiple sizes for flexibility
+      };
+    }
+  });
+};
 
 // GET /api/products - list all products (with optional category filter)
 export const getProducts = asyncHandler(async (req, res) => {
@@ -43,23 +85,14 @@ export const createProduct = asyncHandler(async (req, res) => {
     isHotSelling = false,
     position = 0,
     options = [],
-    activeSale = null // ADDED: Handle active sale if provided
+    activeSale = null
   } = req.body;
 
-  // Handle images from Cloudinary file uploads
+  // Handle images from Cloudinary file uploads with WebP optimization
   let images = [];
   
   if (req.files && req.files.length > 0) {
-    images = req.files.map(file => {
-      const isVideo = file.resource_type === 'video' || 
-                     file.mimetype?.startsWith('video/') ||
-                     file.originalname?.toLowerCase().match(/\.(mp4|mov|avi|mkv|webm|wmv|flv|3gp|m4v)$/);
-      
-      return {
-        url: file.path,
-        type: isVideo ? 'video' : 'image'
-      };
-    });
+    images = processUploadedFiles(req.files);
   }
   
   if (req.body.images) {
@@ -128,7 +161,7 @@ export const createProduct = asyncHandler(async (req, res) => {
     isHotSelling,
     position: parseInt(position) || 0,
     options: parsedOptions,
-    activeSale, // ADDED: Include active sale reference
+    activeSale,
   });
 
   if (categoryId) {
@@ -145,18 +178,9 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
   const updates = req.body;
   
-  // Handle new file uploads to Cloudinary
+  // Handle new file uploads to Cloudinary with WebP optimization
   if (req.files && req.files.length > 0) {
-    const newImages = req.files.map(file => {
-      const isVideo = file.resource_type === 'video' || 
-                     file.mimeType?.startsWith('video/') ||
-                     file.originalname?.toLowerCase().match(/\.(mp4|mov|avi|mkv|webm|wmv|flv|3gp|m4v)$/);
-      
-      return {
-        url: file.path,
-        type: isVideo ? 'video' : 'image'
-      };
-    });
+    const newImages = processUploadedFiles(req.files);
     
     if (updates.images) {
       try {
@@ -281,12 +305,11 @@ export const updateProductPositions = asyncHandler(async (req, res) => {
   res.json({ message: "Product positions updated successfully" });
 });
 
-// ADD THIS NEW ROUTE FOR MIGRATION
+// MIGRATION: Active Sale Field
 export const migrateActiveSaleField = asyncHandler(async (req, res) => {
   try {
     console.log('🔄 Starting activeSale field migration...');
     
-    // Update all products to set activeSale: null if field doesn't exist
     const result = await Product.updateMany(
       { activeSale: { $exists: false } },
       { $set: { activeSale: null } }
@@ -304,6 +327,160 @@ export const migrateActiveSaleField = asyncHandler(async (req, res) => {
     console.error('❌ Migration error:', error);
     res.status(500).json({
       message: 'Migration failed',
+      error: error.message
+    });
+  }
+});
+
+export const migrateImagesToWebP = asyncHandler(async (req, res) => {
+  try {
+    console.log('🔄 Starting WebP image migration...');
+    
+    const products = await Product.find({});
+    let migratedCount = 0;
+    let errorCount = 0;
+    let alreadyMigratedCount = 0;
+
+    for (const product of products) {
+      try {
+        let needsUpdate = false;
+        const updatedImages = [];
+
+        for (const image of product.images) {
+          if (image.type === 'image' && image.url) {
+            // CHECK if already has WebP transformation to avoid duplicates
+            const hasWebPTransform = image.url.includes('/f_webp,');
+            const isAlreadyWebP = image.format === 'webp';
+            
+            if (!hasWebPTransform && !isAlreadyWebP) {
+              // Extract clean public ID (remove any existing transformations)
+              const urlParts = image.url.split('/upload/');
+              if (urlParts.length === 2) {
+                const publicIdWithVersion = urlParts[1];
+                
+                // Create clean WebP URL with SINGLE transformation
+                const webpUrl = `https://res.cloudinary.com/dhxydnzrx/image/upload/f_webp,q_auto:good/${publicIdWithVersion}`;
+                
+                updatedImages.push({
+                  ...image,
+                  url: webpUrl,
+                  format: 'webp',
+                  optimized_urls: generateOptimizedImageUrls(webpUrl),
+                  original_url: image.url // Keep original for reference
+                });
+                needsUpdate = true;
+                console.log(`✅ Migrated: ${image.url.substring(0, 50)}...`);
+              }
+            } else {
+              // Already migrated, just ensure format is set
+              if (!image.format) {
+                updatedImages.push({
+                  ...image,
+                  format: 'webp'
+                });
+                needsUpdate = true;
+              } else {
+                updatedImages.push(image);
+                alreadyMigratedCount++;
+              }
+            }
+          } else {
+            // Videos or non-image files
+            updatedImages.push(image);
+          }
+        }
+
+        if (needsUpdate) {
+          product.images = updatedImages;
+          await product.save();
+          migratedCount++;
+        }
+      } catch (productError) {
+        console.error(`❌ Error migrating product ${product._id}:`, productError.message);
+        errorCount++;
+      }
+    }
+
+    console.log(`🎉 WebP migration completed!`);
+    console.log(`✅ Newly migrated: ${migratedCount} products`);
+    console.log(`📝 Already migrated: ${alreadyMigratedCount} products`);
+    console.log(`❌ Errors: ${errorCount} products`);
+
+    res.json({
+      message: `WebP migration completed successfully`,
+      migratedCount,
+      alreadyMigratedCount,
+      errorCount,
+      totalProducts: products.length,
+      note: 'Duplicate transformations indicate multiple migration runs'
+    });
+    
+  } catch (error) {
+    console.error('❌ Migration error:', error);
+    res.status(500).json({
+      message: 'WebP migration failed',
+      error: error.message
+    });
+  }
+});
+
+// ADD THIS: Cleanup script to fix already-migrated images with duplicates
+export const cleanupDuplicateTransformations = asyncHandler(async (req, res) => {
+  try {
+    console.log('🧹 Cleaning up duplicate WebP transformations...');
+    
+    const products = await Product.find({});
+    let cleanedCount = 0;
+
+    for (const product of products) {
+      let needsCleanup = false;
+      const cleanedImages = [];
+
+      for (const image of product.images) {
+        if (image.type === 'image' && image.url && image.url.includes('/f_webp,')) {
+          // Count how many duplicate transformations exist
+          const transformations = image.url.split('/upload/')[0].split('/f_webp,').length - 1;
+          
+          if (transformations > 1) {
+            // Extract clean public ID and create SINGLE transformation
+            const urlParts = image.url.split('/upload/');
+            if (urlParts.length === 2) {
+              const publicIdWithVersion = urlParts[1];
+              const cleanWebpUrl = `https://res.cloudinary.com/dhxydnzrx/image/upload/f_webp,q_auto:good/${publicIdWithVersion}`;
+              
+              cleanedImages.push({
+                ...image,
+                url: cleanWebpUrl,
+                optimized_urls: generateOptimizedImageUrls(cleanWebpUrl)
+              });
+              needsCleanup = true;
+              console.log(`🧹 Fixed ${transformations} duplicates: ${image.url.substring(0, 60)}...`);
+            }
+          } else {
+            cleanedImages.push(image);
+          }
+        } else {
+          cleanedImages.push(image);
+        }
+      }
+
+      if (needsCleanup) {
+        product.images = cleanedImages;
+        await product.save();
+        cleanedCount++;
+      }
+    }
+
+    res.json({
+      message: `Duplicate transformations cleanup completed`,
+      cleanedCount,
+      totalProducts: products.length
+    });
+    
+  } catch (error) {
+    console.error('❌ Cleanup error:', error);
+    res.status(500).json({
+      message: 'Cleanup failed',
       error: error.message
     });
   }
