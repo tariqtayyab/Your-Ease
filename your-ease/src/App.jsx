@@ -130,10 +130,10 @@ function App() {
   const location = useLocation();
    const hasFetched = useRef(false); 
 
-  //  useEffect(() => {
-  //   // Track page view when route changes
-  //   trackPageView(document.title);
-  // }, [location.pathname]);
+   useEffect(() => {
+    // Track page view when route changes
+    trackPageView(document.title);
+  }, [location.pathname]);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
