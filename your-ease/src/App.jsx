@@ -126,6 +126,7 @@ const ScrollToTop = () => {
 function App() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const location = useLocation();
 

@@ -8,25 +8,10 @@
     
     <!-- 🚀 PERFORMANCE: Preconnect to critical domains -->
     <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://your-ease.onrender.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://your-ease.onrender.com">
     
-    <!-- 🚀 DEFERRED: Google Tag Manager (loads after page is interactive) -->
-    <script>
-      // Initialize dataLayer without blocking
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      
-      // Load GTM after a delay to avoid blocking main thread
-      setTimeout(function() {
-        var script = document.createElement('script');
-        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-RJGHK4N1MF';
-        script.async = true;
-        document.head.appendChild(script);
-      }, 3000); // Load after 3 seconds
-    </script>
-
     <style>
       body {
         margin: 0;
@@ -39,5 +24,22 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- 🚀 DEFERRED: Load GTM after everything else -->
+    <script>
+      setTimeout(function() {
+        // Initialize dataLayer
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-RJGHK4N1MF');
+        
+        // Load GTM script
+        var script = document.createElement('script');
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-RJGHK4N1MF';
+        script.async = true;
+        document.body.appendChild(script);
+      }, 5000); // Load after 5 seconds
+    </script>
   </body>
 </html>

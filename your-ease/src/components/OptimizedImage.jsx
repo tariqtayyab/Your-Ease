@@ -45,7 +45,7 @@ const OptimizedImage = ({
         width={width}
         height={height}
         loading={lazy && !priority ? "lazy" : "eager"}
-        fetchpriority={priority ? "high" : "auto"}
+        fetchPriority={priority ? "high" : "auto"}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         className={`w-full h-full object-contain transition-opacity duration-300 ${
