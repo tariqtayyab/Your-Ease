@@ -4,13 +4,13 @@ import BannerSlider from "../components/BannerSlider";
 import HotSellingSection from "../components/HotSellingSection";
 import CategoriesSection from "../components/CategoriesSection";
 
-const Home = ({ products, onAddToCart }) => {
+const Home = ({ products}) => {
   // 🚀 REMOVED: Duplicate API call - use products from props
   return (
     <div className="min-h-screen">
       <BannerSlider />
-      <HotSellingSection products={products} onAddToCart={onAddToCart} />
-      <CategoriesSection products={products} onAddToCart={onAddToCart} />
+      <HotSellingSection products={products} />
+      <CategoriesSection products={products} />
     </div>
   );
 };

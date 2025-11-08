@@ -293,7 +293,7 @@ useEffect(() => {
       <Routes>
         <Route path="/" element={
           <Suspense fallback={<PageLoader />}>
-            <Home products={products} onAddToCart={handleAddToCart} />
+            <Home products={products} />
           </Suspense>
         } /> 
         
