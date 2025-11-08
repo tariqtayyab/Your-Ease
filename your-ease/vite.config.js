@@ -7,13 +7,13 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://your-ease.onrender.com',
         changeOrigin: true,
         secure: false,
       },
     },
   },
-  // ✅ ADD THIS BUILD OPTIMIZATION SECTION:
+  // ✅ BUILD OPTIMIZATION SECTION:
   build: {
     rollupOptions: {
       output: {
@@ -26,6 +26,13 @@ export default defineConfig({
         }
       }
     },
-    chunkSizeWarningLimit: 1000, // Increase warning limit
+    chunkSizeWarningLimit: 1000,
+  },
+  // ✅ ADD CSS OPTIMIZATION HERE:
+  css: {
+    devSourcemap: false, // Disable sourcemaps in production
+    modules: {
+      localsConvention: 'camelCase',
+    },
   }
 })
