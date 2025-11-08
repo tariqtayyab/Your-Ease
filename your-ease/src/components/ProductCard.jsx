@@ -1,5 +1,4 @@
 // src/components/ProductCard.jsx - FIXED VERSION
-// import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Truck } from "lucide-react";
 import OptimizedImage from './OptimizedImage';
@@ -81,9 +80,9 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
           className="transition-transform duration-500 hover:scale-105 bg-white"
         />
         
-        {/* Free Delivery Badge */}
-        <div className="absolute bottom-2 left-2">
-          <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
+        {/* 🚀 FIXED: Free Delivery Badge with reserved space */}
+        <div className="absolute bottom-2 left-2 w-26 h-6">
+          <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg w-full h-full">
             <div className="flex items-center gap-1">
               <Truck className="w-3 h-3" />
               <span className="text-xs font-semibold whitespace-nowrap">Free Delivery</span>

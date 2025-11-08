@@ -1,33 +1,16 @@
-
-// import React from "react";
+// src/pages/Home.jsx - FIXED VERSION
+import React from "react";
 import BannerSlider from "../components/BannerSlider";
-import axios from "axios";
 import HotSellingSection from "../components/HotSellingSection";
 import CategoriesSection from "../components/CategoriesSection";
-import { useEffect, useState } from "react";
 
-const Home = () => {
-  const [products, setProducts] = useState([]);
-  const API_BASE = import.meta.env.VITE_API_URL;
-
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const { data } = await axios.get(`${API_BASE}/products`);
-        setProducts(data);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      }
-    }
-
-    fetchProducts();
-  }, []);
-
+const Home = ({ products, onAddToCart }) => {
+  // 🚀 REMOVED: Duplicate API call - use products from props
   return (
     <div className="min-h-screen">
       <BannerSlider />
-      <HotSellingSection products={products} />
-      <CategoriesSection products={products} />
+      <HotSellingSection products={products} onAddToCart={onAddToCart} />
+      <CategoriesSection products={products} onAddToCart={onAddToCart} />
     </div>
   );
 };
