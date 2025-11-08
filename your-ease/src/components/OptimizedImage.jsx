@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const OptimizedImage = ({ 
   src, 
@@ -11,25 +11,62 @@ const OptimizedImage = ({
 }) => {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState('');
 
-  // Generate optimized Cloudinary URL
-  const getOptimizedUrl = () => {
-    if (!src || error) return '/placeholder.png';
+  // Generate optimized Cloudinary URLs
+  const getOptimizedUrls = () => {
+    if (!src || error) return { low: '/placeholder.png', high: '/placeholder.png' };
     
     if (typeof src === 'string' && src.includes('res.cloudinary.com') && src.includes('/upload/')) {
-      // Add Cloudinary optimizations for faster loading
-      const transformations = `w_${width},h_${height},c_fill,q_auto,f_auto`;
-      return src.replace('/upload/', `/upload/${transformations}/`);
+      // Low quality placeholder (blurry, fast loading)
+      const lowQualityTransformations = `w_${width},h_${height},c_fill,q_20,blur_100,f_auto`;
+      const lowQualityUrl = src.replace('/upload/', `/upload/${lowQualityTransformations}/`);
+      
+      // High quality final image
+      const highQualityTransformations = `w_${width},h_${height},c_fill,q_auto,f_auto`;
+      const highQualityUrl = src.replace('/upload/', `/upload/${highQualityTransformations}/`);
+      
+      return { low: lowQualityUrl, high: highQualityUrl };
     }
     
-    return src;
+    return { low: src, high: src };
   };
 
-  const optimizedSrc = getOptimizedUrl();
+  const urls = getOptimizedUrls();
+
+  useEffect(() => {
+    // Start with low quality image
+    setCurrentSrc(urls.low);
+    
+    // Preload high quality image
+    const img = new Image();
+    img.src = urls.high;
+    img.onload = () => {
+      // Switch to high quality when loaded
+      setCurrentSrc(urls.high);
+      setLoaded(true);
+    };
+    img.onerror = () => {
+      setError(true);
+    };
+  }, [src]);
+
+  const handleImageLoad = () => {
+    // This handles the low quality image load
+    if (currentSrc === urls.low) {
+      // Low quality loaded, high quality will load via the Image() above
+      return;
+    }
+    setLoaded(true);
+  };
+
+  const handleImageError = () => {
+    setError(true);
+  };
 
   return (
     <div className={`relative ${className}`}>
-      {/* Loading skeleton */}
+      {/* Loading skeleton - only show if neither image has loaded */}
       {!loaded && !error && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse rounded flex items-center justify-center">
           <svg className="w-8 h-8 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -40,16 +77,16 @@ const OptimizedImage = ({
       
       {/* Main image */}
       <img
-        src={optimizedSrc}
+        src={currentSrc}
         alt={alt}
         width={width}
         height={height}
         loading={lazy && !priority ? "lazy" : "eager"}
-        fetchPriority={priority ? "high" : "auto"}
-        onLoad={() => setLoaded(true)}
-        onError={() => setError(true)}
-        className={`w-full h-full object-contain transition-opacity duration-300 ${
-          loaded ? 'opacity-100' : 'opacity-0'
+        fetchpriority={priority ? "high" : "auto"}
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+        className={`w-full h-full object-contain transition-opacity duration-500 ${
+          loaded && currentSrc === urls.high ? 'opacity-100' : 'opacity-70 blur-sm'
         } ${className}`}
       />
       

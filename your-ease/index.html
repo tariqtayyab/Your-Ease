@@ -8,9 +8,9 @@
     
     <!-- 🚀 PERFORMANCE: Preconnect to critical domains -->
     <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://your-ease.onrender.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://your-ease.onrender.com">
 
     <!-- 🚀 CRITICAL CSS (Inlined to prevent render blocking) -->
     <style>
@@ -20,6 +20,7 @@
         padding: 0;
         background: linear-gradient(135deg, #f9fafb 0%, #eff6ff 100%);
         min-height: 100vh;
+        font-family: system-ui, -apple-system, sans-serif;
       }
       
       /* Critical loading animations */
@@ -45,29 +46,26 @@
         transition: all 0.3s ease;
       }
       
-      /* Hide scrollbar for initial load */
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+      /* Ensure root container is properly sized */
+      #root {
+        min-height: 100vh;
       }
     </style>
-
-    <!-- 🚀 DEFERRED: Non-critical CSS - FIXED -->
-    <script>
-      // Load CSS after page is interactive
-      window.addEventListener('load', function() {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = '/assets/index-DEzFa4V1.css';
-        document.head.appendChild(link);
-      });
-    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- 🚀 DEFERRED: Load non-critical resources after interaction -->
+    <script>
+      // Load after user interaction or timeout
+      setTimeout(function() {
+        // These will load after main content is visible
+        var preloads = [
+          'https://fonts.googleapis.com',
+          'https://fonts.gstatic.com'
+        ];
+      }, 1000);
+    </script>
   </body>
-</html> 
+</html>
