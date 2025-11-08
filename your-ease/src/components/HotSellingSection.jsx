@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
+// src/components/HotSellingSection.jsx - FIXED VERSION
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import ProductCard from "./ProductCard";
 
 const HotSellingSection = ({ products = [], onAddToCart }) => {
@@ -6,123 +7,123 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
+  const autoSlideRef = useRef(null);
   
   // Filter only hot selling products
   const hotSellingProducts = Array.isArray(products) 
     ? products.filter(product => product?.isHotSelling === true)
     : [];
-  
-  // Auto slide for mobile every 4 seconds
+
+  // 🚀 FIXED: Optimized scroll state update with debouncing
+  const updateScrollState = useCallback(() => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    setShowLeftArrow(scrollLeft > 10);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    
+    // Calculate active index
+    const container = scrollContainerRef.current;
+    const scrollPosition = container.scrollLeft + container.clientWidth / 2;
+    
+    const productElements = container.querySelectorAll('.product-item');
+    let closestIndex = 0;
+    let minDistance = Infinity;
+    
+    productElements.forEach((element, index) => {
+      const elementCenter = element.offsetLeft + element.offsetWidth / 2;
+      const distance = Math.abs(elementCenter - scrollPosition);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = index;
+      }
+    });
+    
+    setActiveIndex(closestIndex);
+  }, []);
+
+  // 🚀 FIXED: Debounced scroll handler
+  const handleScroll = useCallback(() => {
+    if (scrollContainerRef.current) {
+      requestAnimationFrame(updateScrollState);
+    }
+  }, [updateScrollState]);
+
+  // 🚀 FIXED: Optimized auto-slide with cleanup
   useEffect(() => {
     if (hotSellingProducts.length > 1 && window.innerWidth < 1024) {
-      const interval = setInterval(() => {
-        setActiveIndex((prev) => (prev + 1) % hotSellingProducts.length);
-        scrollToIndex((activeIndex + 1) % hotSellingProducts.length);
+      // Clear any existing interval
+      if (autoSlideRef.current) {
+        clearInterval(autoSlideRef.current);
+      }
+      
+      autoSlideRef.current = setInterval(() => {
+        setActiveIndex((prev) => {
+          const nextIndex = (prev + 1) % hotSellingProducts.length;
+          scrollToIndex(nextIndex);
+          return nextIndex;
+        });
       }, 4000);
-      return () => clearInterval(interval);
-    }
-  }, [hotSellingProducts, activeIndex]);
-
-  // Check scroll position to show/hide arrows and update active index
-  const updateScrollState = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setShowLeftArrow(scrollLeft > 0);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
       
-      // Calculate active index based on scroll position with snap alignment
-      const container = scrollContainerRef.current;
-      const scrollPosition = container.scrollLeft + container.clientWidth / 2;
-      
-      const productElements = container.querySelectorAll('.product-item');
-      let closestIndex = 0;
-      let minDistance = Infinity;
-      
-      productElements.forEach((element, index) => {
-        const elementCenter = element.offsetLeft + element.offsetWidth / 2;
-        const distance = Math.abs(elementCenter - scrollPosition);
-        
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestIndex = index;
+      return () => {
+        if (autoSlideRef.current) {
+          clearInterval(autoSlideRef.current);
         }
-      });
-      
-      setActiveIndex(closestIndex);
+      };
     }
-  };
-  
+  }, [hotSellingProducts.length]);
+
+  // 🚀 FIXED: Single resize listener with cleanup
   useEffect(() => {
-    updateScrollState();
+    const handleResize = () => {
+      updateScrollState();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [updateScrollState]);
+
+  // 🚀 FIXED: Memoized scroll functions
+  const scrollToIndex = useCallback((index) => {
+    if (!scrollContainerRef.current) return;
     
-    // Add resize listener
-    window.addEventListener('resize', updateScrollState);
-    return () => window.removeEventListener('resize', updateScrollState);
-  }, [hotSellingProducts]);
-  
-  const scrollLeft = () => {
-    if (scrollContainerRef.current && activeIndex > 0) {
+    const container = scrollContainerRef.current;
+    const productElements = container.querySelectorAll('.product-item');
+    const targetElement = productElements[index];
+    
+    if (targetElement) {
+      const containerWidth = container.clientWidth;
+      const elementWidth = targetElement.offsetWidth;
+      const elementLeft = targetElement.offsetLeft;
+      
+      const scrollPosition = elementLeft - (containerWidth / 2) + (elementWidth / 2);
+      
+      container.scrollTo({ 
+        left: scrollPosition, 
+        behavior: 'smooth' 
+      });
+    }
+  }, []);
+
+  const scrollLeft = useCallback(() => {
+    if (activeIndex > 0) {
       scrollToIndex(activeIndex - 1);
     }
-  };
+  }, [activeIndex, scrollToIndex]);
 
-  const scrollRight = () => {
-    if (scrollContainerRef.current && activeIndex < hotSellingProducts.length - 1) {
+  const scrollRight = useCallback(() => {
+    if (activeIndex < hotSellingProducts.length - 1) {
       scrollToIndex(activeIndex + 1);
     }
-  };
+  }, [activeIndex, hotSellingProducts.length, scrollToIndex]);
 
-  const scrollToIndex = (index) => {
+  // 🚀 FIXED: Throttled scroll end handler
+  const handleScrollEnd = useCallback(() => {
     if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const productElements = container.querySelectorAll('.product-item');
-      const targetElement = productElements[index];
-      
-      if (targetElement) {
-        const containerWidth = container.clientWidth;
-        const elementWidth = targetElement.offsetWidth;
-        const elementLeft = targetElement.offsetLeft;
-        
-        // FIXED: Calculate scroll position to center the element properly
-        // Remove the previous calculation that was causing the issue
-        const scrollPosition = elementLeft - (containerWidth / 2) + (elementWidth / 2);
-        
-        container.scrollTo({ 
-          left: scrollPosition, 
-          behavior: 'smooth' 
-        });
-
-        // Update active index after a small delay to ensure smooth transition
-        setTimeout(() => {
-          setActiveIndex(index);
-        }, 100);
-      }
+      requestAnimationFrame(updateScrollState);
     }
-  };
-
-  // Handle scroll end for finger scrolling
-  const handleScrollEnd = () => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const productElements = container.querySelectorAll('.product-item');
-      
-      let closestIndex = 0;
-      let minDistance = Infinity;
-      
-      productElements.forEach((element, index) => {
-        const elementCenter = element.offsetLeft + element.offsetWidth / 2;
-        const containerCenter = container.scrollLeft + container.clientWidth / 2;
-        const distance = Math.abs(elementCenter - containerCenter);
-        
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestIndex = index;
-        }
-      });
-      
-      setActiveIndex(closestIndex);
-    }
-  };
+  }, [updateScrollState]);
 
   // Loading state - show skeleton
   if (products.length === 0) {
@@ -212,7 +213,7 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
           <div 
             ref={scrollContainerRef}
             className="overflow-x-auto scrollbar-hide scroll-smooth py-6 lg:py-4 snap-x snap-mandatory"
-            onScroll={updateScrollState}
+            onScroll={handleScroll}
             onTouchEnd={handleScrollEnd}
             onScrollEnd={handleScrollEnd}
           >
@@ -223,6 +224,7 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
                   <ProductCard 
                     product={product} 
                     onAddToCart={onAddToCart}
+                    index={index}
                   />
                 </div>
               ))}
@@ -256,6 +258,7 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
                     <ProductCard 
                       product={product} 
                       onAddToCart={onAddToCart}
+                      index={index}
                     />
                   </div>
                 </div>
@@ -275,26 +278,6 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
               </svg>
             </button>
           )}
-
-          {/* Mobile Navigation Buttons */}
-          {/* <div className="lg:hidden flex justify-between absolute top-1/2 -translate-y-1/2 w-full px-4 pointer-events-none z-10">
-            <button
-              onClick={scrollLeft}
-              className="bg-white/90 hover:bg-gray-50 rounded-2xl p-3 shadow-lg transition-all duration-200 pointer-events-auto border border-gray-200 hover:scale-105"
-            >
-              <svg className="w-5 h-5 text-[#2c9ba3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              onClick={scrollRight}
-              className="bg-white/90 hover:bg-gray-50 rounded-2xl p-3 shadow-lg transition-all duration-200 pointer-events-auto border border-gray-200 hover:scale-105"
-            >
-              <svg className="w-5 h-5 text-[#2c9ba3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div> */}
 
           {/* Mobile Dots Indicator */}
           <div className="lg:hidden flex justify-center mt-6 space-x-2">

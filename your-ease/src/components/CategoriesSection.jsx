@@ -218,6 +218,7 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
                       key={product._id || index} 
                       product={product} 
                       onAddToCart={onAddToCart}
+                      index={index} 
                     />
                   ))}
                 </div>
