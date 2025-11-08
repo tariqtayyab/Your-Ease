@@ -55,9 +55,16 @@
       }
     </style>
 
-    <!-- 🚀 DEFERRED: Non-critical CSS -->
-    <link rel="preload" href="/assets/index-DEzFa4V1.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="/assets/index-DEzFa4V1.css"></noscript>
+    <!-- 🚀 DEFERRED: Non-critical CSS - FIXED -->
+    <script>
+      // Load CSS after page is interactive
+      window.addEventListener('load', function() {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/assets/index-DEzFa4V1.css';
+        document.head.appendChild(link);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
