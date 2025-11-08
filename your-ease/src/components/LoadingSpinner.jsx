@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 
 const LoadingSpinner = () => (
  <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 animate-pulse">

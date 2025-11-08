@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, X, Send, Upload, Image, Video, Trash2, LogIn } from 'lucide-react';
+import { Star, X, Send, Upload, Video, Trash2, LogIn } from 'lucide-react';
 import { createReview } from '../../api';
 import { useNavigate } from 'react-router-dom';
 

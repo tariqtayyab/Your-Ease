@@ -1,11 +1,9 @@
 // src/components/ReviewsSummary.jsx - UPDATED
 import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
-import { getProductReviewStats } from '../../api';
+// import { getProductReviewStats } from '../../api';
 
 const ReviewsSummary = ({ productId, reviews = [], stats, onAddReviewClick, loading = false }) => {
-  // Only show skeleton during initial load when we have NO reviews
-  // Once we have reviews, never show skeleton again
   const showSkeleton = loading && reviews.length === 0;
 
   if (showSkeleton) {

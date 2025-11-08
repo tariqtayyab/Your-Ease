@@ -1,6 +1,6 @@
 // src/pages/FAQ.jsx
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, HelpCircle, ShoppingBag, Truck, Shield, CreditCard, RotateCcw } from 'lucide-react';
+import { ChevronDown, ChevronUp, HelpCircle, ShoppingBag, Truck, CreditCard, RotateCcw } from 'lucide-react';
 
 const FAQ = () => {
   const [openItems, setOpenItems] = useState(new Set());

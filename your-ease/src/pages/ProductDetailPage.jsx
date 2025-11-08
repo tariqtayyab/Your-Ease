@@ -1,7 +1,7 @@
 // src/pages/ProductDetailPage.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star, ChevronLeft, Share2, Heart, Truck, Shield, RotateCcw, Play, Image, ShoppingCart, Check, Copy, CheckCircle, MessageCircle, Zap, LogIn, Package, Clock } from "lucide-react";
+import { Star, ChevronLeft, Share2, Heart, Truck, RotateCcw, Play, Image, ShoppingCart, Check, Copy, CheckCircle, MessageCircle, Zap, LogIn, Package, Clock } from "lucide-react";
 import { addToWishlist, removeFromWishlist, getWishlist, getActiveSales } from "../api";
 import ProductReviews from '../components/reviews/ProductReviews';
 import ReviewImporter from '../components/ReviewImporter';

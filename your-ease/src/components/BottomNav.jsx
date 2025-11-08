@@ -1,5 +1,5 @@
 // src/components/BottomNav.jsx
-import React from "react";
+// import React from "react";
 import { NavLink } from "react-router-dom";
 import { FaHome, FaShoppingCart, FaUser, FaSearch, FaCreditCard } from "react-icons/fa";
 import { useCart } from "../context/CartContext";

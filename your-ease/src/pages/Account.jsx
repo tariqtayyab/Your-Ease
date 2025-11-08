@@ -33,7 +33,6 @@ import {
   XCircle,
   Plus,
   Trash2,
-  Eye,
   Home,
   Building,
   Navigation,

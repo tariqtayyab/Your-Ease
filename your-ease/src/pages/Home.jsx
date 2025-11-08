@@ -1,5 +1,5 @@
 
-import React from "react";
+// import React from "react";
 import BannerSlider from "../components/BannerSlider";
 import axios from "axios";
 import HotSellingSection from "../components/HotSellingSection";

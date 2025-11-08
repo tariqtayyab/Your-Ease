@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Star, Play, X, ZoomIn, Trash2 } from 'lucide-react';
+import { Star, Play, ZoomIn, Trash2 } from 'lucide-react';
 
 const ReviewItem = React.memo(({ review, currentUser, onDeleteReview }) => {
   const [selectedMedia, setSelectedMedia] = useState(null);

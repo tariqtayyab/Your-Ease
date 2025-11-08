@@ -1,5 +1,5 @@
 // src/components/ProductCard.jsx - FIXED VERSION
-import React, { useRef, useEffect } from "react";
+// import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Truck } from "lucide-react";
 import OptimizedImage from './OptimizedImage';

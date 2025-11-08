@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiTruck, FiShield, FiAward, FiHeart, FiUsers, FiShoppingBag, FiStar, FiGlobe, FiTrendingUp } from 'react-icons/fi';
+import { FiTruck, FiShield, FiAward, FiHeart, FiShoppingBag, FiTrendingUp } from 'react-icons/fi';
 
 const AboutPage = () => {
   const milestones = [

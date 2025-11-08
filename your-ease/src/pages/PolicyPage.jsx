@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiFileText, FiShield, FiTruck, FiRotateCcw, FiCreditCard, FiUser } from 'react-icons/fi';
+import { FiFileText, FiShield, FiTruck, FiRotateCcw,} from 'react-icons/fi';
 
 const PolicyPage = () => {
   const [activePolicy, setActivePolicy] = useState('privacy');

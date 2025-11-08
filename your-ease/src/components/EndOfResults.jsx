@@ -1,5 +1,5 @@
 // src/components/EndOfResults.jsx
-import React from 'react';
+// import React from 'react';
 
 const EndOfResults = () => (
   <div className="text-center py-6">

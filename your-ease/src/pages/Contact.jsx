@@ -1,6 +1,6 @@
 // src/pages/Contact.jsx
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Clock, Send, MessageCircle, CheckCircle } from 'lucide-react';
+import { Phone, Mail, Clock, Send, MessageCircle, CheckCircle } from 'lucide-react';
 
 const Contact = () => {
   const [formData, setFormData] = useState({

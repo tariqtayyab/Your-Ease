@@ -16,12 +16,9 @@ import {
   MapPin,
   Calendar,
   CreditCard,
-  ChevronDown,
-  ChevronUp,
   Loader,
   ShoppingBag,
   Tag,
-  List // NEW: Import List icon for options
 } from 'lucide-react';
 import { getOrderDetails, getFilteredOrders, updateOrderStatus } from '../api';
 

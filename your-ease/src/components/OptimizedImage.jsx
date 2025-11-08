@@ -1,4 +1,4 @@
-// src/components/OptimizedImage.jsx - FIXED WITH CORRECT PROP NAME
+/// src/components/OptimizedImage.jsx - FIXED WITH RESPONSIVE SIZES
 import { useState, useEffect } from 'react';
 
 const OptimizedImage = ({ 
@@ -13,8 +13,35 @@ const OptimizedImage = ({
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
+  const [optimizedSize, setOptimizedSize] = useState(width);
 
-  // 🚀 FIXED: Generate SINGLE optimized URL ONCE
+  // 🚀 FIXED: Generate responsive image sizes based on screen width
+  useEffect(() => {
+    const calculateOptimalSize = () => {
+      const screenWidth = window.innerWidth;
+      
+      // Match image size to actual display size
+      if (screenWidth < 768) { // Mobile
+        return 300; // Matches the ~296px display size on mobile
+      } else if (screenWidth < 1024) { // Tablet
+        return 350; // Slightly larger for tablets
+      } else { // Desktop
+        return width; // Keep original for desktop
+      }
+    };
+
+    setOptimizedSize(calculateOptimalSize());
+
+    // Update on resize
+    const handleResize = () => {
+      setOptimizedSize(calculateOptimalSize());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [width]);
+
+  // 🚀 FIXED: Generate optimized URL with responsive sizing
   useEffect(() => {
     if (!src) {
       setImageUrl('/placeholder.png');
@@ -25,13 +52,15 @@ const OptimizedImage = ({
     
     // Only optimize Cloudinary URLs
     if (typeof src === 'string' && src.includes('res.cloudinary.com') && src.includes('/upload/')) {
-      // 🚀 SINGLE optimized image with WebP format and proper sizing
-      const transformations = `w_${width},h_${height},c_fill,q_auto,f_webp`;
+      // 🚀 RESPONSIVE sizing - request exactly what we need
+      const transformations = `w_${optimizedSize},h_${optimizedSize},c_fill,q_auto,f_webp`;
       finalUrl = src.replace('/upload/', `/upload/${transformations}/`);
+      
+      console.log(`🖼️ Loading image at ${optimizedSize}x${optimizedSize}px for ${window.innerWidth}px screen`);
     }
     
     setImageUrl(finalUrl);
-  }, [src, width, height]);
+  }, [src, optimizedSize]); // 🚀 Added optimizedSize dependency
 
   const handleImageLoad = () => {
     setLoaded(true);
@@ -40,17 +69,15 @@ const OptimizedImage = ({
   const handleImageError = () => {
     console.error('❌ Image failed to load:', imageUrl);
     setError(true);
-    // Fallback to placeholder
     setImageUrl('/placeholder.png');
     setLoaded(true);
   };
 
-  // 🚀 Show loading skeleton only when we have a URL but it's not loaded yet
   const showSkeleton = imageUrl && imageUrl !== '/placeholder.png' && !loaded && !error;
 
   return (
     <div className={`relative ${className}`}>
-      {/* Loading skeleton - only show when we're actually loading an image */}
+      {/* Loading skeleton */}
       {showSkeleton && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse rounded flex items-center justify-center z-10">
           <svg className="w-8 h-8 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -59,13 +86,13 @@ const OptimizedImage = ({
         </div>
       )}
       
-      {/* 🚀 SINGLE image element - no dual loading, no preload */}
+      {/* 🚀 Image with responsive sizing */}
       {imageUrl && (
         <img
           src={imageUrl}
           alt={alt}
-          width={width}
-          height={height}
+          width={optimizedSize} // 🚀 Use responsive width
+          height={optimizedSize} // 🚀 Use responsive height
           loading={lazy && !priority ? "lazy" : "eager"}
           fetchPriority={priority ? "high" : "auto"}
           onLoad={handleImageLoad}
