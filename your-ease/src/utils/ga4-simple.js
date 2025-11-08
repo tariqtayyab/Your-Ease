@@ -1,4 +1,4 @@
-// Simple GA4 exports for components
+// src/utils/ga4-simple.js
 import ga4 from './ga4-analytics.js';
 
 // Re-export all methods

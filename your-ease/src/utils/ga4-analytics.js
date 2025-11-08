@@ -1,4 +1,4 @@
-// Enhanced GA4 E-commerce Tracking - Production Ready
+// src/utils/ga4-analytics.js
 class GA4Analytics {
   constructor() {
     this.measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
@@ -12,31 +12,33 @@ class GA4Analytics {
     if (this.initPromise) {
       return this.initPromise;
     }
-
+// Enhanced GA4 E-commerce Tracking - Production Ready
     this.initPromise = this.initGA4();
     return this.initPromise;
   }
 
   async initGA4() {
-    // Check if we're in browser environment
-    if (typeof window === 'undefined') {
-      console.log('GA4: Not in browser environment');
-      return false;
-    }
+  // Check if we're in browser environment
+  if (typeof window === 'undefined') {
+    console.log('GA4: Not in browser environment');
+    return false;
+  }
 
-    if (!this.measurementId) {
-      console.warn('GA4: Measurement ID not found');
-      return false;
-    }
+  if (!this.measurementId) {
+    console.warn('GA4: Measurement ID not found');
+    return false;
+  }
 
-    // Check if already initialized by another script
-    if (window.gtag && window.dataLayer) {
-      this.initialized = true;
-      console.log('GA4: Already initialized by another script');
-      return true;
-    }
+  // Check if already initialized by another script
+  if (window.gtag && window.dataLayer) {
+    this.initialized = true;
+    console.log('GA4: Already initialized by another script');
+    return true;
+  }
 
-    return new Promise((resolve) => {
+  return new Promise((resolve) => {
+    // ✅ ADD DELAY: Wait 5 seconds before loading GA4
+    setTimeout(() => {
       const script = document.createElement('script');
       script.async = true;
       script.src = `https://www.googletagmanager.com/gtag/js?id=${this.measurementId}`;
@@ -56,7 +58,7 @@ class GA4Analytics {
           });
 
           this.initialized = true;
-          console.log('GA4: Initialized successfully');
+          console.log('GA4: Initialized successfully (delayed)');
           
           // Track initial page view
           this.trackPageView('Initial Page Load');
@@ -72,10 +74,10 @@ class GA4Analytics {
         resolve(false);
       };
 
-      // ✅ FIXED: Append to body instead of head to prevent render blocking
       document.body.appendChild(script);
-    });
-  }
+    }, 5000); // ✅ 5 second delay
+  });
+}
 
   async trackPageView(pageTitle, customParams = {}) {
     await this.ensureInitialized();
