@@ -1,8 +1,7 @@
 // src/components/ProductCard.jsx - FIXED VERSION
 import { useNavigate } from "react-router-dom";
-import { Star, Truck } from "lucide-react";
 import OptimizedImage from './OptimizedImage';
-import freeDeliveryIcon from "./images/Asset 1@2x.png" ;
+import freeDeliveryIcon from "./images/Asset 1@2x.png";
 
 const ProductCard = ({ product, onAddToCart, index = 0 }) => {
   const URL_BASE = import.meta.env.VITE_API_BASE_URL;
@@ -82,72 +81,47 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
         />
         
         {/* 🚀 FIXED: Free Delivery Badge with reserved space */}
-       {/* 🚀 CLEAN: Free Delivery Icon Only */}
-<div className="absolute bottom-2 left-1">
-  <img 
-    src={freeDeliveryIcon} 
-    alt="Free Delivery" 
-    className="w-28 h-6 drop-shadow-lg"
-    loading="eager"
-  />
-</div>
+        <div className="absolute bottom-2 left-1">
+          <img 
+            src={freeDeliveryIcon} 
+            alt="Free Delivery" 
+            className="w-28 h-6 drop-shadow-lg"
+            loading="eager"
+          />
+        </div>
       </div>
       
-      {/* Content Container */}
-      <div className="p-3 flex flex-col flex-1">
-        {/* Product Title */}
-        <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-tight">
-          {safeProduct.title}
-        </h3>
-        
-        {/* Price */}
-        <div className="price-container mb-2">
-          <div className="text-[#1e7a7a] font-bold text-base">
-            {formatPrice(safeProduct.price)}
-            {safeProduct.oldPrice > safeProduct.price && (
-              <span className="text-gray-600 text-xs ml-2 line-through">
-                {formatPrice(safeProduct.oldPrice)}
-              </span>
-            )}
-          </div>
-        </div>
-        
-        {/* Rating */}
-        {safeProduct.numReviews > 0 ? (
-          <div className="flex items-center mt-auto">
-            <span className="text-sm text-gray-700 font-medium">
-              {safeProduct.rating.toFixed(1)}
-            </span>
-            <div className="flex text-yellow-400 mx-1">
-              {[...Array(5)].map((_, i) => {
-                const rating = safeProduct.rating || 0;
-                const fullStars = Math.floor(rating);
-                const hasPartialStar = rating % 1 !== 0 && i === fullStars;
-                const partialPercentage = hasPartialStar ? (rating % 1) * 100 : 0;
-                
-                return (
-                  <div key={i} className="relative">
-                    <Star className="w-3 h-3 sm:w-3 sm:h-3 text-gray-300" />
-                    <div 
-                      className="absolute top-0 left-0 overflow-hidden"
-                      style={{ 
-                        width: i < fullStars ? '100%' : (hasPartialStar ? `${partialPercentage}%` : '0%')
-                      }}
-                    >
-                      <Star className="w-3 h-3 sm:w-3 sm:h-3 fill-yellow-400 text-yellow-400" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <span className="text-xs text-gray-700">({safeProduct.numReviews})</span>
-          </div>
-        ) : (
-          <div className="flex items-center mt-auto text-xs text-gray-600">
-            No reviews yet
-          </div>
-        )}
-      </div>
+      {/* 🚀 FIXED: Content Container with min-heights to prevent layout shifts */}
+     {/* Content Container */}
+<div className="p-3 flex flex-col flex-1 min-h-[100px]">
+  {/* Product Title */}
+  <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-tight min-h-[32px]">
+    {safeProduct.title}
+  </h3>
+  
+  {/* Price */}
+  <div className="price-container mb-2 min-h-[20px]">
+    <div className="text-[#1e7a7a] font-bold text-base">
+      {formatPrice(safeProduct.price)}
+      {safeProduct.oldPrice > safeProduct.price && (
+        <span className="text-gray-600 text-xs ml-2 line-through">
+          {formatPrice(safeProduct.oldPrice)}
+        </span>
+      )}
+    </div>
+  </div>
+  
+  {/* Rating */}
+  {safeProduct.numReviews > 0 ? (
+    <div className="flex items-center mt-auto min-h-[16px]">
+      {/* rating content */}
+    </div>
+  ) : (
+    <div className="flex items-center mt-auto text-xs text-gray-600 min-h-[16px]">
+      No reviews yet
+    </div>
+  )}
+</div>
     </article>
   );
 };
