@@ -68,28 +68,32 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
       onClick={handleCardClick}
     >
       {/* Professional Image Container with Fixed Aspect Ratio */}
-      <div className="w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden relative">
-        {/* 🚀 SIMPLIFIED: Let OptimizedImage handle all loading states */}
-        <OptimizedImage 
-          src={imageUrl}
-          alt={safeProduct.title}
-          width={400}
-          height={400}
-          lazy={index >= 3} // Lazy load after first 3 images
-          priority={index < 2} // High priority for first 2 images
-          className="transition-transform duration-500 hover:scale-105 bg-white"
-        />
-        
-        {/* 🚀 FIXED: Free Delivery Badge with reserved space */}
-        <div className="absolute bottom-2 left-1">
-          <img 
-            src={freeDeliveryIcon} 
-            alt="Free Delivery" 
-            className="w-28 h-6 drop-shadow-lg"
-            loading="eager"
-          />
-        </div>
-      </div>
+    <div className="w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden relative">
+  <OptimizedImage 
+    src={imageUrl}
+    alt={safeProduct.title}
+    width={296}
+    height={296}
+    lazy={index >= 3}
+    priority={index < 2}
+    className="transition-transform duration-500 hover:scale-105 bg-white"
+    // 🚀 ADD THIS LINE to prevent layout shift:
+    style={{ width: '296px', height: '296px' }}
+  />
+  
+  {/* Free Delivery Badge - PERFECT ✅ */}
+  <div className="absolute bottom-2 left-1">
+    <img 
+      src={freeDeliveryIcon} 
+      alt="Free Delivery" 
+      className="w-28 h-6 drop-shadow-lg"
+      width="112"
+      height="24"
+      loading="eager"
+      style={{ width: '112px', height: '24px' }}
+    />
+  </div>
+</div>
       
       {/* 🚀 FIXED: Content Container with min-heights to prevent layout shifts */}
      {/* Content Container */}

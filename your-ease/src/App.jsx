@@ -1,10 +1,8 @@
-// src/App.jsx
 import React, { useState, useEffect, lazy, Suspense, useRef } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import BottomNav from "./components/BottomNav";
 import { Routes, Route, useLocation } from "react-router-dom";
-// import AdminRoute from "./components/AdminRoute";
 import WhatsAppButton from './components/WhatsAppButton';
 import SEOHead from "./components/SEOHead";
 import { trackPageView } from './utils/ga4-simple.js';
@@ -136,6 +134,7 @@ function App() {
   }, [location.pathname]);
 
   const API_URL = import.meta.env.VITE_API_URL;
+
 
   // Disable browser's scroll restoration
   useEffect(() => {
@@ -282,7 +281,7 @@ useEffect(() => {
   return (
     <>
       <SEOHead 
-        title="Your Ease Store - Premium Products"
+        title="YourEase Store - Premium Products"
         description="Discover amazing products at great prices. Fast shipping and excellent customer service."
       />
       
@@ -296,7 +295,6 @@ useEffect(() => {
             <Home products={products} />
           </Suspense>
         } /> 
-        
         
         <Route path="/product/:id" element={
           <Suspense fallback={<PageLoader />}>

@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// ✅ Vite proxy configuration + PERFORMANCE OPTIMIZATION
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -13,24 +12,28 @@ export default defineConfig({
       },
     },
   },
-  // ✅ BUILD OPTIMIZATION SECTION:
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
-          // Group vendor libraries into separate chunks
-          'react-vendor': ['react', 'react-dom'],
-          'router-vendor': ['react-router-dom'],
-          'ui-vendor': ['lucide-react'],
+          // 🚀 OPTIMIZED: Better chunk splitting
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'icons-vendor': ['lucide-react', 'react-icons'],
           'utils-vendor': ['axios'],
+          'charts-vendor': ['recharts'],
         }
       }
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 800, // 🚀 Reduced from 1000
+    minify: 'terser', // 🚀 Added minification
+    terserOptions: {
+      compress: {
+        drop_console: true, // 🚀 Remove console logs in production
+      },
+    },
   },
-  // ✅ ADD CSS OPTIMIZATION HERE:
   css: {
-    devSourcemap: false, // Disable sourcemaps in production
+    devSourcemap: false,
     modules: {
       localsConvention: 'camelCase',
     },

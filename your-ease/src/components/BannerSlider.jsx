@@ -7,6 +7,14 @@ const BannerSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // 🚀 OPTIMIZED: Get optimized banner URL
+  const getOptimizedBannerUrl = (url) => {
+    if (url && url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/w_1200,h_600,c_fill,q_auto,f_webp/');
+    }
+    return url;
+  };
+
   const fetchBanners = async () => {
     try {
       const res = await axios.get(`${API_URL}/banners`);
@@ -64,10 +72,16 @@ const BannerSlider = () => {
               key={b._id}
               className="w-full flex-shrink-0 relative bg-white flex items-center justify-center"
             >
+              {/* 🚀 OPTIMIZED: Banner image with explicit dimensions */}
               <img
-                src={b.image}
+                src={getOptimizedBannerUrl(b.image)}
                 alt="Banner"
                 className="w-full h-full object-contain bg-white"
+                width={1200}
+                height={600}
+                loading="eager"
+                fetchpriority="high"
+                style={{ width: '100%', height: '100%' }}
               />
             </div>
           ))}

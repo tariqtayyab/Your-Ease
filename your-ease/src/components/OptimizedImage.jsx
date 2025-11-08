@@ -1,11 +1,11 @@
-/// src/components/OptimizedImage.jsx - FIXED WITH RESPONSIVE SIZES
+// src/components/OptimizedImage.jsx - FIXED WITH EXACT SIZES
 import { useState, useEffect } from 'react';
 
 const OptimizedImage = ({ 
   src, 
   alt, 
-  width = 400, 
-  height = 400, 
+  width = 296,  // 🚀 CHANGED: Default to exact display size
+  height = 296, // 🚀 CHANGED: Default to exact display size
   className = "", 
   lazy = true,
   priority = false 
@@ -13,35 +13,8 @@ const OptimizedImage = ({
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
-  const [optimizedSize, setOptimizedSize] = useState(width);
 
-  // 🚀 FIXED: Generate responsive image sizes based on screen width
-  useEffect(() => {
-    const calculateOptimalSize = () => {
-      const screenWidth = window.innerWidth;
-      
-      // Match image size to actual display size
-      if (screenWidth < 768) { // Mobile
-        return 300; // Matches the ~296px display size on mobile
-      } else if (screenWidth < 1024) { // Tablet
-        return 350; // Slightly larger for tablets
-      } else { // Desktop
-        return width; // Keep original for desktop
-      }
-    };
-
-    setOptimizedSize(calculateOptimalSize());
-
-    // Update on resize
-    const handleResize = () => {
-      setOptimizedSize(calculateOptimalSize());
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [width]);
-
-  // 🚀 FIXED: Generate optimized URL with responsive sizing
+  // 🚀 FIXED: Generate optimized URL with EXACT sizing
   useEffect(() => {
     if (!src) {
       setImageUrl('/placeholder.png');
@@ -52,15 +25,13 @@ const OptimizedImage = ({
     
     // Only optimize Cloudinary URLs
     if (typeof src === 'string' && src.includes('res.cloudinary.com') && src.includes('/upload/')) {
-      // 🚀 RESPONSIVE sizing - request exactly what we need
-      const transformations = `w_${optimizedSize},h_${optimizedSize},c_fill,q_auto,f_webp`;
+      // 🚀 EXACT sizing - request exactly what we display (296x296)
+      const transformations = `w_${width},h_${height},c_fill,q_auto,f_webp`;
       finalUrl = src.replace('/upload/', `/upload/${transformations}/`);
-      
-      console.log(`🖼️ Loading image at ${optimizedSize}x${optimizedSize}px for ${window.innerWidth}px screen`);
     }
     
     setImageUrl(finalUrl);
-  }, [src, optimizedSize]); // 🚀 Added optimizedSize dependency
+  }, [src, width, height]); // 🚀 Use exact width/height from props
 
   const handleImageLoad = () => {
     setLoaded(true);
@@ -86,13 +57,13 @@ const OptimizedImage = ({
         </div>
       )}
       
-      {/* 🚀 Image with responsive sizing */}
+      {/* 🚀 Image with EXACT sizing */}
       {imageUrl && (
         <img
           src={imageUrl}
           alt={alt}
-          width={optimizedSize} // 🚀 Use responsive width
-          height={optimizedSize} // 🚀 Use responsive height
+          width={width}  // 🚀 Use exact width
+          height={height} // 🚀 Use exact height
           loading={lazy && !priority ? "lazy" : "eager"}
           fetchPriority={priority ? "high" : "auto"}
           onLoad={handleImageLoad}
@@ -101,6 +72,10 @@ const OptimizedImage = ({
             loaded ? 'opacity-100' : 'opacity-0'
           } ${className}`}
           decoding="async"
+          style={{ 
+            width: `${width}px`, 
+            height: `${height}px` 
+          }} // 🚀 Prevent layout shift
         />
       )}
       
