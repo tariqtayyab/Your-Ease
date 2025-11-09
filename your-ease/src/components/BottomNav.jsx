@@ -13,7 +13,8 @@ import { useCart } from "../context/CartContext";
 export default function BottomNav() {
   const { cartCount } = useCart();
 
-  const activeClass = "flex flex-col items-center justify-center text-xs text-white bg-[#2c9ba3] p-2 rounded-lg scale-105";
+  // const activeClass = "flex flex-col items-center justify-center text-xs text-white bg-[#2c9ba3] p-2 rounded-lg scale-105";
+  const activeClass = "flex flex-col items-center justify-center text-xs text-white bg-[var(--teal-darker)] p-2 rounded-lg scale-105";
   const inactiveClass = "flex flex-col items-center justify-center text-xs text-[#2c9ba3] p-1";
 
   return (

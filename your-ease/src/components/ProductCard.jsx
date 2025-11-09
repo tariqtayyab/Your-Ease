@@ -78,10 +78,12 @@ const ProductCard = ({ product, index = 0 }) => {
           className="bg-white"
         />
         
-     <div className="absolute bottom-2 left-1 z-10 w-32">
+ <div className="absolute bottom-2 left-1 z-10 w-32">
   <img 
     src="/assets/Asset 2.webp" 
     alt="Free Delivery"
+    width={128}
+    height={48}
     className="w-full h-auto"
     loading="lazy"
     onError={(e) => {
@@ -99,7 +101,7 @@ const ProductCard = ({ product, index = 0 }) => {
         </h3>
         
         <div className="price-container mb-2 min-h-[20px]">
-          <div className="text-[#1e7a7a] font-bold text-base">
+          <div className="text-[var(--teal-darker)] font-bold text-base">
             {formatPrice(safeProduct.price)}
             {safeProduct.oldPrice > safeProduct.price && (
               <span className="text-gray-600 text-xs ml-2 line-through">

@@ -5,7 +5,7 @@ export default function Footer() {
   const logo = "https://res.cloudinary.com/dhxydnzrx/image/upload/w_200,h_62,c_fill,q_auto,f_auto/Your_Ease_png_s4csrk.png"
   
   return (
-    <footer className="bg-[#2c9ba3] text-white mt-10">
+    <footer className="bg-[var(--teal-dark)] text-white mt-10">
       <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Brand Info */}
         <div>
@@ -61,9 +61,9 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="bg-[#248489] text-center py-4 text-sm">
-        © {new Date().getFullYear()} YourEase. All rights reserved.
-      </div>
+     <div className="bg-[var(--teal-dark)] text-center py-4 text-sm">
+  © 2025 YourEase. All rights reserved.
+</div>
       <div className="h-16 w-full bg-white md:hidden"></div>
     </footer>
   )

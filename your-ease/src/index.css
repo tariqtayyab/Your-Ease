@@ -175,3 +175,10 @@ footer {
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+/* Add CSS variables at the top */
+:root {
+  --teal-dark: #1a6d73;
+  --teal-darker: #0d5c5c;
+  --teal-primary: #248489;
+}
