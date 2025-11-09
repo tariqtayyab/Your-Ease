@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import OptimizedImage from './OptimizedImage';
 import { Star, Truck } from "lucide-react";
 
-const ProductCard = ({ product, onAddToCart, index = 0 }) => {
+const ProductCard = ({ product, index = 0 }) => {
   const URL_BASE = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
   

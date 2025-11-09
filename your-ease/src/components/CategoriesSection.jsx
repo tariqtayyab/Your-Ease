@@ -6,7 +6,7 @@ import { apiCache } from "../utils/apiCache";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-const CategoriesSection = ({ products = [], onAddToCart }) => {
+const CategoriesSection = ({ products = [],}) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -189,7 +189,6 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
                     <ProductCard 
                       key={product._id || product.id || index} 
                       product={product} 
-                      onAddToCart={onAddToCart}
                       index={index} 
                     />
                   ))}

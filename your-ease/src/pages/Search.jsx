@@ -4,7 +4,7 @@ import axios from "axios";
 import ProductCard from "../components/ProductCard";
 import { FiSearch, FiFilter, FiX, FiSliders } from "react-icons/fi";
 
-const Search = ({ onAddToCart }) => {
+const Search = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -422,7 +422,6 @@ const Search = ({ onAddToCart }) => {
                   <ProductCard 
                     key={product._id || index} 
                     product={product} 
-                    onAddToCart={onAddToCart}
                   />
                 ))}
               </div>

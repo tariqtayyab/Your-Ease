@@ -304,7 +304,7 @@ useEffect(() => {
         
         <Route path="/category/:categoryId" element={
           <Suspense fallback={<PageLoader />}>
-            <CategoryPage onAddToCart={handleAddToCart} />
+            <CategoryPage />
           </Suspense>
         } />
         
@@ -358,7 +358,7 @@ useEffect(() => {
         
         <Route path="/search" element={
           <Suspense fallback={<PageLoader />}>
-            <Search onAddToCart={handleAddToCart} />
+            <Search/>
           </Suspense>
         } />
         

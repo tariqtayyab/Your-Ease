@@ -5,7 +5,7 @@ import ProductCard from "../components/ProductCard";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-const CategoryPage = ({ onAddToCart }) => {
+const CategoryPage = () => {
   const { categoryId } = useParams();
   const location = useLocation();
   const [category, setCategory] = useState(null);
@@ -335,7 +335,6 @@ const CategoryPage = ({ onAddToCart }) => {
               <ProductCard
                 key={product._id}
                 product={product}
-                onAddToCart={onAddToCart}
               />
             ))}
           </div>

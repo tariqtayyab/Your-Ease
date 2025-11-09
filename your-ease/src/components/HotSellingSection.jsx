@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import ProductCard from "./ProductCard";
 
-const HotSellingSection = ({ products = [], onAddToCart }) => {
+const HotSellingSection = ({ products = [], }) => {
   const scrollContainerRef = useRef(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -222,7 +222,6 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
                 <div key={product?._id || product?.id || index} className="transform hover:scale-105 transition-transform duration-300">
                   <ProductCard 
                     product={product} 
-                    onAddToCart={onAddToCart}
                     index={index}
                   />
                 </div>
@@ -262,7 +261,6 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
                     `}>
                       <ProductCard 
                         product={product} 
-                        onAddToCart={onAddToCart}
                         index={index}
                       />
                     </div>
