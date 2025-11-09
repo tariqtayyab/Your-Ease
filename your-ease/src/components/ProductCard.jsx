@@ -1,7 +1,7 @@
-// src/components/ProductCard.jsx - FIXED CLS VERSION
+// src/components/ProductCard.jsx - OPTIMIZED VERSION
 import { useNavigate } from "react-router-dom";
 import OptimizedImage from './OptimizedImage';
-import { Star } from "lucide-react";
+import { Star, Truck } from "lucide-react";
 
 const ProductCard = ({ product, onAddToCart, index = 0 }) => {
   const URL_BASE = import.meta.env.VITE_API_BASE_URL;
@@ -78,17 +78,15 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
           className="bg-white"
         />
         
-        {/* Free Delivery Badge */}
-        <div className="absolute bottom-2 left-1">
-          <img 
-            src="/assets/Asset 1@2x.png" 
-            alt="Free Delivery" 
-            className="w-28 h-6 drop-shadow-lg"
-            width="112"
-            height="24"
-            loading="eager"
-          />
-        </div>
+        {/* 🚀 OPTIMIZED: Free Delivery Badge - CSS Version */}
+        {safeProduct.freeDelivery && (
+          <div className="absolute bottom-2 left-1 z-10">
+            <div className="free-delivery-badge bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
+              <Truck className="w-3 h-3" />
+              <span>Free Delivery</span>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Content Container */}
