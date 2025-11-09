@@ -231,42 +231,32 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
             </div>
 
             {/* Mobile & Tablet: Horizontal scroll with centered scaling and snap alignment */}
-          <div className="flex gap-6 md:gap-8 w-max lg:hidden px-8 md:px-12 items-center h-full">
+        <div className="flex gap-6 md:gap-8 w-max lg:hidden px-8 md:px-12 items-center h-full">
   {hotSellingProducts.map((product, index) => (
     <div 
       key={product?._id || product?.id || index} 
       className={`
-        product-item flex-shrink-0 transition-all duration-500 ease-out snap-center
-        relative
+        product-item flex-shrink-0 transition-all duration-300 ease-out snap-center
+        ${index === activeIndex ? 'z-10 brightness-105' : 'opacity-90'}
       `}
       style={{
         width: '280px',
-        height: '420px', // 🚀 Fixed height to contain scaled content
         scrollSnapAlign: 'center'
       }}
       onClick={() => scrollToIndex(index)}
     >
-      {/* 🚀 Scaling container that doesn't affect layout */}
       <div className={`
-        absolute inset-0 transition-all duration-500 ease-out
+        bg-white rounded-2xl overflow-hidden border-2 transition-all duration-300
         ${index === activeIndex 
-          ? 'scale-110 transform-gpu z-10' 
-          : 'scale-95 opacity-85 transform-gpu'
+          ? 'border-[#2c9ba3] shadow-xl' 
+          : 'border-gray-100 shadow-md'
         }
       `}>
-        <div className={`
-          bg-white rounded-2xl overflow-hidden border-2 w-full h-full
-          ${index === activeIndex 
-            ? 'border-[#2c9ba3] shadow-xl' 
-            : 'border-gray-100 shadow-md'
-          }
-        `}>
-          <ProductCard 
-            product={product} 
-            onAddToCart={onAddToCart}
-            index={index}
-          />
-        </div>
+        <ProductCard 
+          product={product} 
+          onAddToCart={onAddToCart}
+          index={index}
+        />
       </div>
     </div>
   ))}
