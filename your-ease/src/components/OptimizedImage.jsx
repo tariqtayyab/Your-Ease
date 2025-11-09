@@ -1,12 +1,13 @@
-// src/components/OptimizedImage.jsx - FINAL FIXED VERSION
+// src/components/OptimizedImage.jsx - FIXED CLS VERSION
 import { useState, useEffect } from 'react';
 
 const OptimizedImage = ({ 
   src, 
   alt, 
-  width = 280,  // Default to your card size
-  height = 280, // Default to your card size
+  width = 280,
+  height = 280,
   className = "", 
+  containerClassName = "", // 🚀 ADD THIS BACK
   lazy = true,
   priority = false
 }) => {
@@ -43,23 +44,28 @@ const OptimizedImage = ({
   const showSkeleton = imageUrl && imageUrl !== '/placeholder.png' && !loaded && !error;
 
   return (
-    <div className={`relative w-full h-full ${className}`}>
-      {/* Loading skeleton - matches image dimensions */}
+    <div className={`relative w-full h-full ${containerClassName} ${className}`}> {/* 🚀 FIXED: Include containerClassName */}
+      {/* Loading skeleton */}
       {showSkeleton && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse rounded flex items-center justify-center z-10">
+        <div 
+          className="absolute inset-0 bg-gray-200 animate-pulse rounded flex items-center justify-center z-10"
+          style={{
+            aspectRatio: '1 / 1'
+          }}
+        >
           <svg className="w-8 h-8 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 1.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM0 10a10 10 0 1110 10A10 10 0 010 10z" clipRule="evenodd" />
           </svg>
         </div>
       )}
       
-      {/* 🚀 CRITICAL FIX: Remove fixed pixel styling, let parent container control size */}
+      {/* Image with CLS prevention */}
       {imageUrl && (
         <img
           src={imageUrl}
           alt={alt}
-          width={width}   // Keep for SEO/accessibility
-          height={height} // Keep for SEO/accessibility  
+          width={width}
+          height={height}
           loading={lazy && !priority ? "lazy" : "eager"}
           fetchPriority={priority ? "high" : "auto"}
           onLoad={handleImageLoad}
@@ -67,6 +73,9 @@ const OptimizedImage = ({
           className={`w-full h-full object-contain transition-opacity duration-300 ${
             loaded ? 'opacity-100' : 'opacity-0'
           }`}
+          style={{
+            aspectRatio: '1 / 1'
+          }}
           decoding="async"
         />
       )}
