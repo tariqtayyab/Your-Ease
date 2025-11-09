@@ -51,28 +51,28 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
   }, [updateScrollState]);
 
   // 🚀 FIXED: Optimized auto-slide with cleanup
-  useEffect(() => {
-    if (hotSellingProducts.length > 1 && window.innerWidth < 1024) {
-      // Clear any existing interval
-      if (autoSlideRef.current) {
-        clearInterval(autoSlideRef.current);
-      }
+  // useEffect(() => {
+  //   if (hotSellingProducts.length > 1 && window.innerWidth < 1024) {
+  //     // Clear any existing interval
+  //     if (autoSlideRef.current) {
+  //       clearInterval(autoSlideRef.current);
+  //     }
       
-      autoSlideRef.current = setInterval(() => {
-        setActiveIndex((prev) => {
-          const nextIndex = (prev + 1) % hotSellingProducts.length;
-          scrollToIndex(nextIndex);
-          return nextIndex;
-        });
-      }, 4000);
+  //     autoSlideRef.current = setInterval(() => {
+  //       setActiveIndex((prev) => {
+  //         const nextIndex = (prev + 1) % hotSellingProducts.length;
+  //         scrollToIndex(nextIndex);
+  //         return nextIndex;
+  //       });
+  //     }, 4000);
       
-      return () => {
-        if (autoSlideRef.current) {
-          clearInterval(autoSlideRef.current);
-        }
-      };
-    }
-  }, [hotSellingProducts.length]);
+  //     return () => {
+  //       if (autoSlideRef.current) {
+  //         clearInterval(autoSlideRef.current);
+  //       }
+  //     };
+  //   }
+  // }, [hotSellingProducts.length]);
 
   // 🚀 FIXED: Single resize listener with cleanup
   useEffect(() => {
@@ -231,13 +231,13 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
             </div>
 
             {/* Mobile & Tablet: Horizontal scroll with centered scaling and snap alignment */}
-        <div className="flex gap-6 md:gap-8 w-max lg:hidden px-8 md:px-12 items-center h-full">
+          <div className="flex gap-6 md:gap-8 w-max lg:hidden px-8 md:px-12 items-center h-full">
   {hotSellingProducts.map((product, index) => (
     <div 
       key={product?._id || product?.id || index} 
       className={`
         product-item flex-shrink-0 transition-all duration-300 ease-out snap-center
-        ${index === activeIndex ? 'z-10 brightness-105' : 'opacity-90'}
+        ${index === activeIndex ? 'z-10' : ''}
       `}
       style={{
         width: '280px',
@@ -249,7 +249,7 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
         bg-white rounded-2xl overflow-hidden border-2 transition-all duration-300
         ${index === activeIndex 
           ? 'border-[#2c9ba3] shadow-xl' 
-          : 'border-gray-100 shadow-md'
+          : 'border-gray-100 shadow-md border-opacity-50'
         }
       `}>
         <ProductCard 
