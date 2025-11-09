@@ -144,3 +144,30 @@ footer {
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
+.product-card {
+  min-height: 400px; /* Prevents card height changes */
+}
+
+/* Ensure consistent image container sizing */
+.aspect-square {
+  position: relative;
+  min-height: 280px; /* Reserve space for images */
+}
+
+/* Prevent layout shifts during image loading */
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* Creates 1:1 aspect ratio */
+}
+
+.image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

@@ -1,20 +1,19 @@
-// src/components/OptimizedImage.jsx - FIXED WITH EXACT SIZES
+// src/components/OptimizedImage.jsx - FINAL FIXED VERSION
 import { useState, useEffect } from 'react';
 
 const OptimizedImage = ({ 
   src, 
   alt, 
-  width = 296,  // 🚀 CHANGED: Default to exact display size
-  height = 296, // 🚀 CHANGED: Default to exact display size
+  width = 280,  // Default to your card size
+  height = 280, // Default to your card size
   className = "", 
   lazy = true,
-  priority = false 
+  priority = false
 }) => {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
 
-  // 🚀 FIXED: Generate optimized URL with EXACT sizing
   useEffect(() => {
     if (!src) {
       setImageUrl('/placeholder.png');
@@ -23,22 +22,19 @@ const OptimizedImage = ({
     
     let finalUrl = src;
     
-    // Only optimize Cloudinary URLs
     if (typeof src === 'string' && src.includes('res.cloudinary.com') && src.includes('/upload/')) {
-      // 🚀 EXACT sizing - request exactly what we display (296x296)
       const transformations = `w_${width},h_${height},c_fill,q_auto,f_webp`;
       finalUrl = src.replace('/upload/', `/upload/${transformations}/`);
     }
     
     setImageUrl(finalUrl);
-  }, [src, width, height]); // 🚀 Use exact width/height from props
+  }, [src, width, height]);
 
   const handleImageLoad = () => {
     setLoaded(true);
   };
 
   const handleImageError = () => {
-    console.error('❌ Image failed to load:', imageUrl);
     setError(true);
     setImageUrl('/placeholder.png');
     setLoaded(true);
@@ -47,8 +43,8 @@ const OptimizedImage = ({
   const showSkeleton = imageUrl && imageUrl !== '/placeholder.png' && !loaded && !error;
 
   return (
-    <div className={`relative ${className}`}>
-      {/* Loading skeleton */}
+    <div className={`relative w-full h-full ${className}`}>
+      {/* Loading skeleton - matches image dimensions */}
       {showSkeleton && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse rounded flex items-center justify-center z-10">
           <svg className="w-8 h-8 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -57,29 +53,24 @@ const OptimizedImage = ({
         </div>
       )}
       
-      {/* 🚀 Image with EXACT sizing */}
+      {/* 🚀 CRITICAL FIX: Remove fixed pixel styling, let parent container control size */}
       {imageUrl && (
         <img
           src={imageUrl}
           alt={alt}
-          width={width}  // 🚀 Use exact width
-          height={height} // 🚀 Use exact height
+          width={width}   // Keep for SEO/accessibility
+          height={height} // Keep for SEO/accessibility  
           loading={lazy && !priority ? "lazy" : "eager"}
           fetchPriority={priority ? "high" : "auto"}
           onLoad={handleImageLoad}
           onError={handleImageError}
           className={`w-full h-full object-contain transition-opacity duration-300 ${
             loaded ? 'opacity-100' : 'opacity-0'
-          } ${className}`}
+          }`}
           decoding="async"
-          style={{ 
-            width: `${width}px`, 
-            height: `${height}px` 
-          }} // 🚀 Prevent layout shift
         />
       )}
       
-      {/* Error fallback */}
       {error && (
         <div className="absolute inset-0 bg-gray-100 flex items-center justify-center rounded">
           <div className="text-center">

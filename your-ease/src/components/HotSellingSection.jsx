@@ -51,28 +51,28 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
   }, [updateScrollState]);
 
   // 🚀 FIXED: Optimized auto-slide with cleanup
-  // useEffect(() => {
-  //   if (hotSellingProducts.length > 1 && window.innerWidth < 1024) {
-  //     // Clear any existing interval
-  //     if (autoSlideRef.current) {
-  //       clearInterval(autoSlideRef.current);
-  //     }
+  useEffect(() => {
+    if (hotSellingProducts.length > 1 && window.innerWidth < 1024) {
+      // Clear any existing interval
+      if (autoSlideRef.current) {
+        clearInterval(autoSlideRef.current);
+      }
       
-  //     autoSlideRef.current = setInterval(() => {
-  //       setActiveIndex((prev) => {
-  //         const nextIndex = (prev + 1) % hotSellingProducts.length;
-  //         scrollToIndex(nextIndex);
-  //         return nextIndex;
-  //       });
-  //     }, 4000);
+      autoSlideRef.current = setInterval(() => {
+        setActiveIndex((prev) => {
+          const nextIndex = (prev + 1) % hotSellingProducts.length;
+          scrollToIndex(nextIndex);
+          return nextIndex;
+        });
+      }, 4000);
       
-  //     return () => {
-  //       if (autoSlideRef.current) {
-  //         clearInterval(autoSlideRef.current);
-  //       }
-  //     };
-  //   }
-  // }, [hotSellingProducts.length]);
+      return () => {
+        if (autoSlideRef.current) {
+          clearInterval(autoSlideRef.current);
+        }
+      };
+    }
+  }, [hotSellingProducts.length]);
 
   // 🚀 FIXED: Single resize listener with cleanup
   useEffect(() => {
@@ -236,27 +236,37 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
     <div 
       key={product?._id || product?.id || index} 
       className={`
-        product-item flex-shrink-0 transition-all duration-300 ease-out snap-center
-        ${index === activeIndex ? 'z-10' : ''}
+        product-item flex-shrink-0 transition-all duration-500 ease-out snap-center
+        relative
       `}
       style={{
         width: '280px',
+        height: '420px', // 🚀 Fixed height to contain scaled content
         scrollSnapAlign: 'center'
       }}
       onClick={() => scrollToIndex(index)}
     >
+      {/* 🚀 Scaling container that doesn't affect layout */}
       <div className={`
-        bg-white rounded-2xl overflow-hidden border-2 transition-all duration-300
+        absolute inset-0 transition-all duration-500 ease-out
         ${index === activeIndex 
-          ? 'border-[#2c9ba3] shadow-xl' 
-          : 'border-gray-100 shadow-md border-opacity-50'
+          ? 'scale-110 transform-gpu z-10' 
+          : 'scale-95 opacity-85 transform-gpu'
         }
       `}>
-        <ProductCard 
-          product={product} 
-          onAddToCart={onAddToCart}
-          index={index}
-        />
+        <div className={`
+          bg-white rounded-2xl overflow-hidden border-2 w-full h-full
+          ${index === activeIndex 
+            ? 'border-[#2c9ba3] shadow-xl' 
+            : 'border-gray-100 shadow-md'
+          }
+        `}>
+          <ProductCard 
+            product={product} 
+            onAddToCart={onAddToCart}
+            index={index}
+          />
+        </div>
       </div>
     </div>
   ))}
