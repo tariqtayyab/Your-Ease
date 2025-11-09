@@ -288,7 +288,8 @@ useEffect(() => {
       <Navbar cartCount={calculateTotalItems()} />
       <WhatsAppButton />
       <ScrollToTop />
-      
+
+      <main>
       <Routes>
         <Route path="/" element={
           <Suspense fallback={<PageLoader />}>
@@ -386,6 +387,7 @@ useEffect(() => {
           </Suspense>
         } />
       </Routes>
+          </main>
 
       <BottomNav />
       <Footer />

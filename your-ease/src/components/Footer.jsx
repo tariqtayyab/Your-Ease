@@ -53,10 +53,10 @@ export default function Footer() {
         <div>
           <h3 className="text-lg font-semibold mb-3">Follow Us</h3>
           <div className="flex space-x-4">
-            <a href="#"><FiFacebook size={22} className="hover:text-black" /></a>
-            <a href="#"><FiInstagram size={22} className="hover:text-black" /></a>
-            <a href="#"><FiTwitter size={22} className="hover:text-black" /></a>
-            <a href="#"><FiYoutube size={22} className="hover:text-black" /></a>
+            <a href="https://www.facebook.com/YourEasePk"><FiFacebook size={22} className="hover:text-black" /></a>
+            <a href="https://www.instagram.com/its_tariq_61/"><FiInstagram size={22} className="hover:text-black" /></a>
+            <a href="https://x.com/"><FiTwitter size={22} className="hover:text-black" /></a>
+            <a href="https://www.youtube.com/"><FiYoutube size={22} className="hover:text-black" /></a>
           </div>
         </div>
       </div>

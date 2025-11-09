@@ -181,4 +181,6 @@ footer {
   --teal-dark: #1a6d73;
   --teal-darker: #0d5c5c;
   --teal-primary: #248489;
+    --text-primary: #374151;    /* gray-700 */
+  --text-secondary: #6b7280;  /* gray-500 */
 }
