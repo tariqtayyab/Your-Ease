@@ -1,4 +1,4 @@
-// src/components/ProductCard.jsx - FIXED CLS VERSION
+// src/components/ProductCard.jsx - FINAL FIXED CLS VERSION
 import { useNavigate } from "react-router-dom";
 import OptimizedImage from './OptimizedImage';
 import { Star } from "lucide-react";
@@ -62,12 +62,22 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
 
   return (
     <article 
-      className="product-card bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full cursor-pointer"
+      className="product-card bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg flex flex-col h-full cursor-pointer"
       aria-label={`Product: ${safeProduct.title}`}
       onClick={handleCardClick}
+      style={{ 
+        minHeight: '420px', // 🚀 Force consistent height
+        contain: 'layout style paint' // 🚀 Browser optimization to prevent layout shifts
+      }}
     >
-      {/* Professional Image Container with Fixed Aspect Ratio */}
-      <div className="w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden relative">
+      {/* Image Container with Explicit Dimensions */}
+      <div 
+        className="w-full bg-gray-50 flex items-center justify-center overflow-hidden relative"
+        style={{
+          height: '280px', // 🚀 Fixed height
+          minHeight: '280px'
+        }}
+      >
         <OptimizedImage 
           src={imageUrl}
           alt={safeProduct.title}
@@ -75,11 +85,11 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
           height={280}
           lazy={index >= 3}
           priority={index < 2}
-          className="bg-white"
+          containerClassName="w-full h-full flex items-center justify-center"
         />
         
         {/* Free Delivery Badge */}
-        <div className="absolute bottom-2 left-1">
+        <div className="absolute bottom-2 left-1 z-10">
           <img 
             src="/assets/Asset 1@2x.png" 
             alt="Free Delivery" 
@@ -87,17 +97,21 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
             width="112"
             height="24"
             loading="eager"
+            style={{ width: '112px', height: '24px' }} // 🚀 Fixed dimensions
           />
         </div>
       </div>
       
-      {/* Content Container */}
-      <div className="p-3 flex flex-col flex-1 min-h-[100px]">
-        <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-tight min-h-[32px]">
+      {/* Content Container with Fixed Heights */}
+      <div 
+        className="p-3 flex flex-col flex-1"
+        style={{ minHeight: '140px' }} // 🚀 Fixed content height
+      >
+        <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 leading-tight min-h-[40px] flex items-start">
           {safeProduct.title}
         </h3>
         
-        <div className="price-container mb-2 min-h-[20px]">
+        <div className="price-container mb-2 min-h-[24px] flex items-center">
           <div className="text-[#1e7a7a] font-bold text-base">
             {formatPrice(safeProduct.price)}
             {safeProduct.oldPrice > safeProduct.price && (
@@ -138,7 +152,7 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
             <span className="text-xs text-gray-700">({safeProduct.numReviews})</span>
           </div>
         ) : (
-          <div className="flex items-center mt-auto text-xs text-gray-600 min-h-[16px]">
+          <div className="flex items-center mt-auto text-xs text-gray-600 min-h-[20px]">
             No reviews yet
           </div>
         )}
