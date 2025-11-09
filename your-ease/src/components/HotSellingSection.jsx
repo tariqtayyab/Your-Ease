@@ -223,6 +223,7 @@ const HotSellingSection = ({ products = [], }) => {
                   <ProductCard 
                     product={product} 
                     index={index}
+                    section="hot-selling"
                   />
                 </div>
               ))}
@@ -262,6 +263,7 @@ const HotSellingSection = ({ products = [], }) => {
                       <ProductCard 
                         product={product} 
                         index={index}
+                        section="hot-selling"
                       />
                     </div>
                   </div>

@@ -190,6 +190,7 @@ const CategoriesSection = ({ products = [],}) => {
                       key={product._id || product.id || index} 
                       product={product} 
                       index={index} 
+                      section="categories"
                     />
                   ))}
                 </div>

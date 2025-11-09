@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import OptimizedImage from './OptimizedImage';
 import { Star, Truck } from "lucide-react";
 
-const ProductCard = ({ product, index = 0 }) => {
+const ProductCard = ({ product, index = 0, section = 'categories' }) => {
   const URL_BASE = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
   
@@ -78,20 +78,19 @@ const ProductCard = ({ product, index = 0 }) => {
           className="bg-white"
         />
         
- <div className="absolute bottom-2 left-1 z-10 w-32">
-  <img 
-    src="/assets/Asset 2.webp" 
-    alt="Free Delivery"
-    width={128}
-    height={48}
-    className="w-full h-auto"
-    loading="lazy"
-    onError={(e) => {
-      // Fallback if WebP isn't supported
-      e.target.src = '/assets/Asset 1@2x.png';
-    }}
-  />
-</div>
+  <div className={`absolute bottom-1 left-1 z-10 transform ${section === 'hot-selling' ? 'scale-100' : 'scale-75 origin-bottom-left'}`}>
+          <img 
+            src="/assets/Asset 2.webp" 
+            alt="Free Delivery"
+            width={258}
+            height={60}
+            className="w-32 h-12 object-contain"
+            loading="lazy"
+            onError={(e) => {
+              e.target.src = '/assets/Asset 1@2x.png';
+            }}
+          />
+        </div>
       </div>
       
       {/* Content Container */}
