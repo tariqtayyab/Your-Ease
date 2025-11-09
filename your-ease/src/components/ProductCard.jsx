@@ -1,7 +1,6 @@
 // src/components/ProductCard.jsx - FIXED VERSION
 import { useNavigate } from "react-router-dom";
 import OptimizedImage from './OptimizedImage';
-import freeDeliveryIcon from "./images/Asset 1@2x.png";
 
 const ProductCard = ({ product, onAddToCart, index = 0 }) => {
   const URL_BASE = import.meta.env.VITE_API_BASE_URL;
@@ -77,14 +76,12 @@ const ProductCard = ({ product, onAddToCart, index = 0 }) => {
     lazy={index >= 3}
     priority={index < 2}
     className="transition-transform duration-500 hover:scale-105 bg-white"
-    // 🚀 ADD THIS LINE to prevent layout shift:
-    style={{ width: '296px', height: '296px' }}
   />
   
   {/* Free Delivery Badge - PERFECT ✅ */}
   <div className="absolute bottom-2 left-1">
     <img 
-      src={freeDeliveryIcon} 
+      src="/assets/Asset 1@2x.png" 
       alt="Free Delivery" 
       className="w-28 h-6 drop-shadow-lg"
       width="112"
