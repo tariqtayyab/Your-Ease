@@ -1,4 +1,4 @@
-// src/components/HotSellingSection.jsx - FIXED CLS VERSION
+// src/components/HotSellingSection.jsx - FINAL FIXED VERSION
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import ProductCard from "./ProductCard";
 
@@ -217,10 +217,10 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
             onTouchEnd={handleScrollEnd}
             onScrollEnd={handleScrollEnd}
           >
-            {/* Desktop: Show products in a proper grid when enough space */}
+            {/* 🚀 FIXED: Desktop Grid - Remove transform that causes CLS */}
             <div className="hidden lg:grid lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
               {hotSellingProducts.map((product, index) => (
-                <div key={product?._id || product?.id || index} className="transform hover:scale-105 transition-transform duration-300">
+                <div key={product?._id || product?.id || index} className="transition-all duration-300 hover:shadow-xl">
                   <ProductCard 
                     product={product} 
                     onAddToCart={onAddToCart}
@@ -230,7 +230,7 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
               ))}
             </div>
 
-            {/* 🚀 FIXED: Mobile & Tablet - No more scaling that causes CLS */}
+            {/* Mobile & Tablet: Horizontal scroll */}
             <div className="flex gap-6 md:gap-8 w-max lg:hidden px-8 md:px-12 items-center h-full">
               {hotSellingProducts.map((product, index) => (
                 <div 
@@ -250,7 +250,6 @@ const HotSellingSection = ({ products = [], onAddToCart }) => {
                   }}
                   onClick={() => scrollToIndex(index)}
                 >
-                  {/* 🚀 FIXED: Remove scaling transform - use opacity and borders instead */}
                   <div className={`
                     w-full h-full transition-all duration-300
                     ${index === activeIndex ? 'opacity-100' : 'opacity-90'}
