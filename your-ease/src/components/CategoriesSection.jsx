@@ -20,7 +20,7 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
         setWindowWidth(window.innerWidth);
-      }, 100); // Throttle to 100ms
+      }, 100);
     };
 
     window.addEventListener('resize', handleResize);
@@ -144,7 +144,8 @@ const CategoriesSection = ({ products = [], onAddToCart }) => {
     </section>
   ), []);
 
-  if (loading) {
+  // 🚀 CRITICAL FIX: Show skeleton until BOTH categories AND products are loaded
+  if (loading || products.length === 0) {
     return SkeletonLoader;
   }
 
