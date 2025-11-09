@@ -78,15 +78,18 @@ const ProductCard = ({ product, index = 0 }) => {
           className="bg-white"
         />
         
-        {/* 🚀 OPTIMIZED: Free Delivery Badge - CSS Version */}
-        {safeProduct.freeDelivery && (
-          <div className="absolute bottom-2 left-1 z-10">
-            <div className="free-delivery-badge bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
-              <Truck className="w-3 h-3" />
-              <span>Free Delivery</span>
-            </div>
-          </div>
-        )}
+     <div className="absolute bottom-2 left-1 z-10 w-32">
+  <img 
+    src="/assets/Asset 2.webp" 
+    alt="Free Delivery"
+    className="w-full h-auto"
+    loading="lazy"
+    onError={(e) => {
+      // Fallback if WebP isn't supported
+      e.target.src = '/assets/Asset 1@2x.png';
+    }}
+  />
+</div>
       </div>
       
       {/* Content Container */}
