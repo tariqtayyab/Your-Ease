@@ -159,25 +159,3 @@ footer {
   aspect-ratio: 1 / 1;
 }
 
-/* ========== ULTIMATE CLS FIX ========== */
-.product-card {
-  min-height: 420px !important;
-  width: 100%;
-  contain: layout style paint !important;
-}
-
-/* Force all product card images to have consistent dimensions */
-.product-card .relative {
-  height: 280px !important;
-  min-height: 280px !important;
-}
-
-/* Prevent any layout shifts in product cards */
-.product-card * {
-  transform: translateZ(0); /* Hardware acceleration */
-}
-
-/* Ensure content containers don't shift */
-.product-card > div:last-child {
-  min-height: 140px !important;
-}
