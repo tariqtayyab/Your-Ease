@@ -371,19 +371,37 @@ const checkSaleStatus = async (product) => {
   };
 
   // Helper function to get image URL
-  const getImageUrl = (imageObj) => {
-    if (!imageObj) return "/placeholder.png";
-    
-    if (typeof imageObj === 'string') {
-      return imageObj.startsWith('http') ? imageObj : `${BASE_URL}${imageObj}`;
-    }
-    
-    if (imageObj.url) {
-      return imageObj.url.startsWith('http') ? imageObj.url : `${BASE_URL}${imageObj.url}`;
-    }
-    
+ const getImageUrl = (imageObj, size = 'medium') => {
+  if (!imageObj) return "/placeholder.png";
+  
+  let imageUrl = '';
+  
+  // Get base URL
+  if (typeof imageObj === 'string') {
+    imageUrl = imageObj.startsWith('http') ? imageObj : `${BASE_URL}${imageObj}`;
+  } else if (imageObj.url) {
+    imageUrl = imageObj.url.startsWith('http') ? imageObj.url : `${BASE_URL}${imageObj.url}`;
+  } else {
     return "/placeholder.png";
-  };
+  }
+  
+  // If it's a Cloudinary URL, optimize it
+  if (imageUrl.includes('res.cloudinary.com')) {
+    const sizeParams = {
+      small: 'w_150,q_auto,f_auto',    // For thumbnails
+      medium: 'w_400,q_auto,f_auto',   // For main display
+      large: 'w_800,q_auto,f_auto'     // For full size
+    };
+    
+    // Insert optimization parameters before the version part
+    const urlParts = imageUrl.split('/upload/');
+    if (urlParts.length === 2) {
+      return `${urlParts[0]}/upload/${sizeParams[size]}/${urlParts[1]}`;
+    }
+  }
+  
+  return imageUrl;
+};
 
   // Save cart to localStorage
   const saveCartToLocalStorage = (cartItems) => {
@@ -804,12 +822,13 @@ const handleBuyNow = () => {
       {/* Navigation */}
       <nav className="">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors text-sm sm:text-base"
-          >
-            <ChevronLeft className="w-6 h-6 sm:w-5 sm:h-5 mr-2" />
-          </button>
+         <button 
+  onClick={() => navigate(-1)}
+  className="flex items-center text-gray-600 hover:text-gray-900 transition-colors text-sm sm:text-base"
+  aria-label="Go back to previous page"
+>
+  <ChevronLeft className="w-6 h-6 sm:w-5 sm:h-5 mr-2" />
+</button>
         </div>
       </nav>
 
@@ -1002,32 +1021,34 @@ const handleBuyNow = () => {
                       onTouchMove={handleTouchMove}
                       onTouchEnd={handleTouchEnd}
                     >
-                      <img 
-                        src={getCurrentMedia()} 
-                        alt={product.title}
-                        className="w-full h-full object-contain bg-white select-none"
-                        onError={(e) => {
-                          e.target.src = "/placeholder.png";
-                        }}
-                        draggable="false"
-                      />
+                   <img 
+  src={getImageUrl(getCurrentMedia(), 'medium')} 
+  alt={product.title}
+  className="w-full h-full object-contain bg-white select-none"
+  onError={(e) => {
+    e.target.src = "/placeholder.png";
+  }}
+  draggable="false"
+/>
                       
                       {images.length > 1 && (
                         <>
-                          <button
-                            onClick={() => setSelectedImage(prev => Math.max(0, prev - 1))}
-                            disabled={selectedImage === 0}
-                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full disabled:opacity-30 hidden sm:block"
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setSelectedImage(prev => Math.min(images.length - 1, prev + 1))}
-                            disabled={selectedImage === images.length - 1}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full disabled:opacity-30 hidden sm:block"
-                          >
-                            <ChevronLeft className="w-4 h-4 rotate-180" />
-                          </button>
+                         <button
+  onClick={() => setSelectedImage(prev => Math.max(0, prev - 1))}
+  disabled={selectedImage === 0}
+  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full disabled:opacity-30 hidden sm:block"
+  aria-label="Previous image"
+>
+  <ChevronLeft className="w-4 h-4" />
+</button>
+<button
+  onClick={() => setSelectedImage(prev => Math.min(images.length - 1, prev + 1))}
+  disabled={selectedImage === images.length - 1}
+  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full disabled:opacity-30 hidden sm:block"
+  aria-label="Next image"
+>
+  <ChevronLeft className="w-4 h-4 rotate-180" />
+</button>
                         </>
                       )}
                     </div>
@@ -1078,13 +1099,13 @@ const handleBuyNow = () => {
                     >
                       {mediaType === "images" ? (
                         <img 
-                          src={item} 
-                          alt={`${product.title} view ${index + 1}`}
-                          className="w-full h-full object-contain bg-white"
-                          onError={(e) => {
-                            e.target.src = "/placeholder.png";
-                          }}
-                        />
+  src={getImageUrl(item, 'small')} 
+  alt={`${product.title} view ${index + 1}`}
+  className="w-full h-full object-contain bg-white"
+  onError={(e) => {
+    e.target.src = "/placeholder.png";
+  }}
+/>
                       ) : (
                         <div className="w-full h-full bg-black flex items-center justify-center relative">
                           {videoThumbnails[item] ? (
@@ -1121,9 +1142,10 @@ const handleBuyNow = () => {
             <div className="space-y-4 sm:space-y-6">
               {/* Header */}
               <div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 leading-tight">
-                  {product.title}
-                </h1>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 leading-tight">
+  {product.title}
+</h2>
+
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => {
@@ -1246,23 +1268,25 @@ const handleBuyNow = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                 <span className="font-medium text-gray-900 text-sm sm:text-base">Quantity:</span>
                 <div className="flex items-center border border-gray-300 rounded-lg self-start">
-                  <button 
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-                    disabled={product.countInStock === 0}
-                  >
-                    -
-                  </button>
+                 <button 
+  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+  className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+  disabled={product.countInStock === 0}
+  aria-label="Decrease quantity"
+>
+  -
+</button>
                   <span className="px-3 sm:px-4 py-2 border-l border-r border-gray-300 min-w-[40px] sm:min-w-[60px] text-center font-medium text-sm sm:text-base">
                     {quantity}
                   </span>
                   <button 
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-                    disabled={product.countInStock === 0 || quantity >= product.countInStock}
-                  >
-                    +
-                  </button>
+  onClick={() => setQuantity(quantity + 1)}
+  className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+  disabled={product.countInStock === 0 || quantity >= product.countInStock}
+  aria-label="Increase quantity"
+>
+  +
+</button>
                 </div>
                 {product.countInStock > 0 && (
                   <span className="text-xs sm:text-sm text-gray-600">
@@ -1426,17 +1450,17 @@ const handleBuyNow = () => {
           <div ref={reviewsSectionRef} className="border-t border-gray-200">
             <div className="flex border-b border-gray-200">
               {["description", "specifications", "reviews"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-3 sm:py-4 font-medium text-center capitalize transition-colors text-sm sm:text-base ${
-                    activeTab === tab
-                      ? "text-teal-600 border-b-2 border-teal-600"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {tab}
-                </button>
+               <button
+  key={tab}
+  onClick={() => setActiveTab(tab)}
+  className={`flex-1 py-3 sm:py-4 font-medium text-center capitalize transition-colors text-sm sm:text-base ${
+    activeTab === tab
+      ? "text-teal-700 border-b-2 border-teal-700"  // Changed from teal-600
+      : "text-gray-700 hover:text-gray-900"  // Changed from gray-600
+  }`}
+>
+  {tab}
+</button>
               ))}
             </div>
 
