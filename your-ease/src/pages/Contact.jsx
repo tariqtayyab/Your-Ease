@@ -62,7 +62,7 @@ const Contact = () => {
       icon: Phone,
       title: "Call Us",
       description: "Speak directly with our team",
-      details: "+92 325 8211422",
+      details: "+447478034524",
       action: "tel:+923258211422",
       color: "teal"
     },
@@ -71,15 +71,15 @@ const Contact = () => {
       title: "WhatsApp",
       description: "Chat with us instantly",
       details: "24/7 Available",
-      action: "https://wa.me/923258211422",
+      action: "https://wa.me/447478034524",
       color: "green"
     },
     {
       icon: Mail,
       title: "Email Us",
       description: "Send us a detailed message",
-      details: "team.yourease@gmail.com",
-      action: "mailto:team.yourease@gmail.com",
+      details: "gorbusinessltd@gmail.com",
+      action: "mailto:gorbusinessltd@gmail.com",
       color: "blue"
     },
   ];
