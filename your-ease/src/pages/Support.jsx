@@ -78,8 +78,8 @@ const Support = () => {
       icon: Mail,
       title: "Email Support",
       description: "Send us an email",
-      details: "team.yourease@gmail.com",
-      action: "mailto:team.yourease@gmail.com",
+      details: "team.gorbusinessltd@gmail.com",
+      action: "mailto:team.gorbusinessltd@gmail.com",
       color: "blue"
     },
     {

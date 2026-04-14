@@ -38,7 +38,7 @@ const AboutPage = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#2c9ba3] to-[#34b4bd] text-white py-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">About YourEase</h1>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">About gorbusinessltd</h1>
           <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-8 opacity-90">
             Pakistan's Trusted E-commerce Partner - Delivering Excellence
           </p>
@@ -68,7 +68,7 @@ const AboutPage = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Our Commitment to Excellence</h2>
           <div className="space-y-4 text-lg text-gray-600 leading-relaxed">
             <p>
-              YourEase was founded on a simple yet powerful vision: to make quality products accessible 
+              gorbusinessltd was founded on a simple yet powerful vision: to make quality products accessible 
               to every Pakistani with unparalleled convenience and service. We understand the unique 
               needs of the Pakistani market and have built our platform around delivering exceptional 
               value to our customers.
@@ -192,7 +192,7 @@ const AboutPage = () => {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
-            Why Customers Choose YourEase
+            Why Customers Choose gorbusinessltd
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <div className="text-center p-6">
@@ -232,7 +232,7 @@ const AboutPage = () => {
       <section className="py-16 bg-gradient-to-r from-[#2c9ba3] to-[#34b4bd]">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Experience the YourEase Difference
+            Experience the gorbusinessltd Difference
           </h2>
           <p className="text-xl text-white opacity-90 mb-8 max-w-2xl mx-auto">
             Experience the convenience and quality that keeps customers coming back

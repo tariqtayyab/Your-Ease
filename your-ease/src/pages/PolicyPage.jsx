@@ -11,7 +11,7 @@ const PolicyPage = () => {
       title: "Privacy Policy",
       content: `
         <h3 className="text-xl font-semibold mb-4">Your Privacy Matters</h3>
-        <p className="mb-4">At YourEase, we are committed to protecting your privacy and ensuring the security of your personal information.</p>
+        <p className="mb-4">At gorbusinessltd, we are committed to protecting your privacy and ensuring the security of your personal information.</p>
         
         <h4 className="font-semibold mb-2">Information We Collect</h4>
         <ul className="list-disc list-inside mb-4 space-y-1">
@@ -41,7 +41,7 @@ const PolicyPage = () => {
   title: "Terms of Service",
   content: `
     <h3 className="text-xl font-semibold mb-4">Terms & Conditions</h3>
-    <p className="mb-4">By using YourEase, you agree to comply with and be bound by the following terms and conditions.</p>
+    <p className="mb-4">By using gorbusinessltd, you agree to comply with and be bound by the following terms and conditions.</p>
     
     <h4 className="font-semibold mb-2">Account Registration</h4>
     <ul className="list-disc list-inside mb-4 space-y-1">
@@ -78,7 +78,7 @@ const PolicyPage = () => {
 
     <h4 className="font-semibold mb-2">Transaction Completion</h4>
     <ul className="list-disc list-inside mb-4 space-y-1">
-      <li>The sales contract between you and YourEase is finalized upon product delivery</li>
+      <li>The sales contract between you and gorbusinessltd is finalized upon product delivery</li>
       <li>Delivery confirmation via tracking or customer acknowledgment completes the transaction</li>
       <li>Post-delivery disputes are handled through our returns and refunds policy</li>
       <li>Payment obligations are confirmed upon successful delivery</li>
