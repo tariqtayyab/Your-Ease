@@ -41,7 +41,7 @@ export default function Footer() {
           <h3 className="text-xs font-semibold mb-3 uppercase tracking-wider text-gray-200">Connect</h3>
           <div className="flex space-x-3">
             <a 
-              href="https://www.facebook.com/YourEasePk" 
+              href="https://www.facebook.com" 
               aria-label="Facebook"
               target="_blank" 
               rel="noopener noreferrer"
@@ -50,7 +50,7 @@ export default function Footer() {
               <FiFacebook size={16} />
             </a>
             <a 
-              href="https://www.instagram.com/its_tariq_61/" 
+              href="https://www.instagram.com" 
               aria-label="Instagram"
               target="_blank" 
               rel="noopener noreferrer"
