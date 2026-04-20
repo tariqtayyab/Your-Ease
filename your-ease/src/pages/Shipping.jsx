@@ -15,7 +15,7 @@ const Shipping = () => {
             Shipping Policy
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Enjoy <span className="font-bold text-teal-600">FREE delivery</span> across Pakistan with real-time tracking and secure delivery.
+            Enjoy <span className="font-bold text-teal-600">FREE delivery</span> with real-time tracking and secure delivery.
           </p>
         </div>
 
@@ -26,10 +26,10 @@ const Shipping = () => {
             <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-6 text-white text-center mb-8">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <Gift className="w-6 h-6" />
-                <h2 className="text-2xl font-bold">Free Delivery All Over Pakistan!</h2>
+                <h2 className="text-2xl font-bold">free delivery all over United Kingdom!</h2>
               </div>
               <p className="text-teal-100">
-                No minimum order value • No hidden charges • Free shipping to every corner of Pakistan
+                No minimum order value • No hidden charges • Free shipping across England, Scotland, Wales & Northern Ireland
               </p>
             </div>
 
@@ -46,15 +46,25 @@ const Shipping = () => {
                     <Clock className="w-5 h-5 text-teal-600" />
                     <h3 className="text-lg font-semibold text-teal-900">Standard Delivery</h3>
                   </div>
-                  <p className="text-teal-800 mb-2">Delivery within 3-7 business days</p>
+                  <p className="text-teal-800 mb-2">Delivery within 3-5 business days</p>
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-teal-600">FREE</span>
-                    <span className="text-teal-700 line-through text-sm">Rs 200</span>
+                    <span className="text-teal-700 line-through text-sm">£3.99</span>
                   </div>
                   <p className="text-sm text-teal-700 mt-2">Available nationwide</p>
                 </div>
 
-               
+                <div className="bg-teal-50 border border-teal-200 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Zap className="w-5 h-5 text-teal-600" />
+                    <h3 className="text-lg font-semibold text-teal-900">Express Delivery</h3>
+                  </div>
+                  <p className="text-teal-800 mb-2">Delivery within 1-2 business days</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-teal-600">£4.99</span>
+                  </div>
+                  <p className="text-sm text-teal-700 mt-2">Available for most postcodes</p>
+                </div>
               </div>
             </section>
 
@@ -67,9 +77,9 @@ const Shipping = () => {
               
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 {[
-                  'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad',
-                  'Peshawar', 'Quetta', 'Multan', 'Hyderabad', 'Gujranwala',
-                  'Sialkot', 'Sargodha', 'Bahawalpur', 'Sukkur', 'Larkana'
+                  'London', 'Birmingham', 'Manchester', 'Liverpool', 'Leeds',
+                  'Glasgow', 'Edinburgh', 'Bristol', 'Sheffield', 'Newcastle',
+                  'Nottingham', 'Leicester', 'Southampton', 'Cardiff', 'Belfast'
                 ].map((city) => (
                   <div key={city} className="bg-gray-50 rounded-lg p-3 text-center">
                     <span className="text-gray-700 font-medium">{city}</span>
@@ -77,7 +87,7 @@ const Shipping = () => {
                 ))}
               </div>
               <p className="text-gray-600 text-sm text-center">
-                We deliver to every city, town, and village across Pakistan - absolutely free!
+                We deliver to every city, town, and village across the UK - absolutely free for standard delivery!
               </p>
             </section>
 
@@ -97,7 +107,7 @@ const Shipping = () => {
                   },
                   {
                     step: "Free Shipping",
-                    description: "Your order is shipped at no extra cost - we cover all delivery charges."
+                    description: "Your order is shipped at no extra cost - we cover all standard delivery charges."
                   },
                   {
                     step: "Shipment Dispatch",
@@ -128,12 +138,13 @@ const Shipping = () => {
                 Important Delivery Information
               </h3>
               <ul className="text-blue-800 space-y-2 text-sm">
-                <li>• <strong>Free shipping</strong> on all orders across Pakistan</li>
+                <li>• <strong>Free standard shipping</strong> on all orders across the UK</li>
                 <li>• Delivery times are estimates and may vary due to weather conditions or unforeseen circumstances</li>
                 <li>• Someone must be available at the delivery address to receive the package</li>
                 <li>• Please ensure your shipping address is complete and accurate</li>
                 <li>• Contact us within 24 hours if you need to modify your shipping address</li>
-                <li>• No extra charges for remote areas or difficult-to-reach locations</li>
+                <li>• No extra charges for remote areas or Highlands & Islands (may take additional 1-2 days)</li>
+                <li>• Express delivery not available for some remote postcodes - check at checkout</li>
               </ul>
             </section>
 

@@ -14,7 +14,7 @@ const AboutPage = () => {
     {
       icon: <FiShield className="w-8 h-8" />,
       title: "Trust & Reliability",
-      description: "Built on years of trusted service and reliable delivery across Pakistan"
+      description: "Built on years of trusted service and reliable delivery across the United Kingdom"
     },
     {
       icon: <FiTrendingUp className="w-8 h-8" />,
@@ -40,7 +40,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">About gorbusinessltd</h1>
           <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-8 opacity-90">
-            Pakistan's Trusted E-commerce Partner - Delivering Excellence
+            UK's Trusted E-commerce Partner - Delivering Excellence
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -69,8 +69,8 @@ const AboutPage = () => {
           <div className="space-y-4 text-lg text-gray-600 leading-relaxed">
             <p>
               gorbusinessltd was founded on a simple yet powerful vision: to make quality products accessible 
-              to every Pakistani with unparalleled convenience and service. We understand the unique 
-              needs of the Pakistani market and have built our platform around delivering exceptional 
+              to every customer in the United Kingdom with unparalleled convenience and service. We understand the unique 
+              needs of the UK market and have built our platform around delivering exceptional 
               value to our customers.
             </p>
             <p>
@@ -104,7 +104,7 @@ const AboutPage = () => {
               },
               {
                 title: "Nationwide Accessibility",
-                description: "Making quality products available to customers across Pakistan"
+                description: "Making quality products available to customers across the United Kingdom"
               },
               {
                 title: "Trust & Reliability",
@@ -167,9 +167,9 @@ const AboutPage = () => {
               </div>
               <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
               <p className="text-lg opacity-90 leading-relaxed">
-                To revolutionize online shopping in Pakistan by providing unparalleled access to quality products, 
+                To revolutionize online shopping in the United Kingdom by providing unparalleled access to quality products, 
                 exceptional customer service, and innovative solutions that make shopping effortless and enjoyable 
-                for every Pakistani.
+                for every customer across the UK.
               </p>
             </div>
 
@@ -180,7 +180,7 @@ const AboutPage = () => {
               </div>
               <h3 className="text-2xl font-bold mb-4">Our Vision</h3>
               <p className="text-lg opacity-90 leading-relaxed">
-                To be the most trusted and innovative e-commerce platform in Pakistan, setting new standards 
+                To be the most trusted and innovative e-commerce platform in the United Kingdom, setting new standards 
                 for customer experience while empowering businesses and communities through digital commerce.
               </p>
             </div>
@@ -199,9 +199,9 @@ const AboutPage = () => {
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FiTruck className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Nationwide Free Delivery</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Free UK Delivery</h3>
               <p className="text-gray-600">
-                Enjoy free shipping to every corner of Pakistan with our extensive delivery network
+                Enjoy free standard shipping to every corner of the United Kingdom with our extensive delivery network
               </p>
             </div>
             

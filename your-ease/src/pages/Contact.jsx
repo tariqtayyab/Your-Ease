@@ -78,8 +78,8 @@ const Contact = () => {
       icon: Mail,
       title: "Email Us",
       description: "Send us a detailed message",
-      details: "gorbusinessltd@gmail.com",
-      action: "mailto:gorbusinessltd@gmail.com",
+      details: "gorbusinessltd096@gmail.com",
+      action: "mailto:gorbusinessltd096@gmail.com",
       color: "blue"
     },
   ];

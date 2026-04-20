@@ -32,17 +32,18 @@ const ProductCard = ({ product, index = 0, section = 'categories' }) => {
 
   const formatPrice = (price) => {
     if (price === undefined || price === null || isNaN(price)) {
-      return "Rs --";
+      return "£--";
     }
     
     const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
     
     if (isNaN(numericPrice)) {
-      return "Rs --";
+      return "£--";
     }
     
-    return `Rs ${numericPrice.toLocaleString('en-IN', {
-      maximumFractionDigits: 0
+    return `£${numericPrice.toLocaleString('en-GB', {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2
     })}`;
   };
 
@@ -78,7 +79,7 @@ const ProductCard = ({ product, index = 0, section = 'categories' }) => {
           className="bg-white"
         />
         
-  <div className={`absolute bottom-1 left-1 z-10 transform ${section === 'hot-selling' ? 'scale-100' : 'scale-75 origin-bottom-left'}`}>
+        <div className={`absolute bottom-1 left-1 z-10 transform ${section === 'hot-selling' ? 'scale-100' : 'scale-75 origin-bottom-left'}`}>
           <img 
             src="/assets/Asset 2.webp" 
             alt="Free Delivery"

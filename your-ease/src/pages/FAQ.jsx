@@ -200,7 +200,7 @@ const FAQ = () => {
               WhatsApp Chat
             </a>
             <a 
-              href="mailto:team.gorbusinessltd@gmail.com"
+              href="mailto:gorbusinessltd096@gmail.com"
               className="bg-transparent border border-white text-white px-6 py-3 rounded-lg hover:bg-white hover:text-teal-600 transition-colors font-semibold"
             >
               Email Us
