@@ -647,10 +647,13 @@ const handleBuyNow = () => {
     setShowShareOptions(false);
   };
 
-  const formatPrice = (price) => {
-    if (!price || isNaN(price)) return "Rs --";
-    return `Rs ${parseFloat(price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-  };
+const formatPrice = (price) => {
+  if (!price || isNaN(price)) return "£--";
+  return `£${parseFloat(price).toLocaleString('en-GB', { 
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2 
+  })}`;
+};
 
   const getMediaUrl = (mediaObj) => {
     if (!mediaObj) return "/placeholder.png";
