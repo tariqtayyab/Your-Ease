@@ -217,7 +217,7 @@ export default function Navbar() {
             <Link to="/">
               <img 
   src={logo} 
-  alt="YourEase logo" 
+  alt="gorbusinessltd logo" 
   className="w-28 md:w-32" 
   width={112}   // 28 * 4 (Tailwind w-28 = 112px)
   height={35}   // Proportional height for your logo

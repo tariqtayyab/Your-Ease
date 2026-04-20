@@ -213,13 +213,13 @@ const Returns = () => {
               </p>
               <div className="flex gap-3 justify-center">
                 <a 
-                  href="tel:+923258211422"
+                  href="tel:+447478034524"
                   className="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 transition-colors font-medium"
                 >
                   Call Support
                 </a>
                 <a 
-                  href="https://wa.me/923258211422"
+                  href="https://wa.me/447478034524"
                   className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
                 >
                   WhatsApp

@@ -63,7 +63,7 @@ const Support = () => {
       title: "Phone Support",
       description: "Call us for immediate assistance",
       details: "+92 325 8211422",
-      action: "tel:+923258211422",
+      action: "tel:+447478034524",
       color: "teal"
     },
     {
@@ -71,7 +71,7 @@ const Support = () => {
       title: "WhatsApp",
       description: "Chat with us on WhatsApp",
       details: "24/7 Available",
-      action: "https://wa.me/923258211422",
+      action: "https://wa.me/447478034524",
       color: "green"
     },
     {

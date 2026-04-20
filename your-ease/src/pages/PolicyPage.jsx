@@ -296,7 +296,7 @@ const PolicyPage = () => {
               Contact Support
             </Link>
             <a 
-              href="https://wa.me/923258211422"
+              href="https://wa.me/447478034524"
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold"
             >
               WhatsApp Help

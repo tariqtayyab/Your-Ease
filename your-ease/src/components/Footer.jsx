@@ -84,7 +84,7 @@ export default function Footer() {
       <div className="border-t border-gray-600">
         <div className="max-w-4xl mx-auto px-4 py-3 text-center">
           <p className="text-xs text-gray-300">
-            © 2025 YourEase. All rights reserved.
+            © 2025 gorbusinessltd. All rights reserved.
           </p>
         </div>
       </div>

@@ -528,7 +528,7 @@ const handleBuyNow = () => {
     
     const message = `Hello! I would like to order this product:\n\n📦 *${product.title}*\n💰 Price: ${productPrice}\n${quantityText}\n${quantity > 1 ? `💵 Total: ${totalPrice}\n` : ''}${optionsText}\nPlease confirm availability and proceed with my order.`;
     
-    const phoneNumber = "923258211422";
+    const phoneNumber = "447478034524";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');

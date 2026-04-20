@@ -7,7 +7,7 @@ const SEOHead = ({
   product = null,
   canonicalUrl 
 }) => {
-  const siteName = import.meta.env.VITE_SITE_NAME || "YourEase";
+  const siteName = import.meta.env.VITE_SITE_NAME || "gorbusinessltd";
   const siteUrl = import.meta.env.VITE_SITE_URL || "http://localhost:5173";
   const defaultImage = "/logo.png";
   

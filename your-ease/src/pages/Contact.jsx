@@ -63,7 +63,7 @@ const Contact = () => {
       title: "Call Us",
       description: "Speak directly with our team",
       details: "+447478034524",
-      action: "tel:+923258211422",
+      action: "tel:+447478034524",
       color: "teal"
     },
     {
