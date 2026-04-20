@@ -1168,7 +1168,7 @@ export default function CategoriesAdmin() {
                       
                       <div className="md:col-span-1">
                         <input 
-                          placeholder="Old Price (Rs)" 
+                          placeholder="Old Price (£)" 
                           type="number"
                           className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           value={productForm.oldPrice} 
@@ -1178,7 +1178,7 @@ export default function CategoriesAdmin() {
                       
                       <div className="md:col-span-1">
                         <input 
-                          placeholder="Current Price (Rs) *" 
+                          placeholder="Current Price (£) *" 
                           type="number"
                           className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           required

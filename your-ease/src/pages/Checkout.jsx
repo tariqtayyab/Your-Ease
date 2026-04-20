@@ -13,7 +13,7 @@ const Checkout = ({ cart, calculateTotal, clearCart }) => {
     phone2: '', // New optional phone field
     address: '',
     city: '',
-    country: 'Pakistan',
+    country: 'United Kingdom',
     paymentMethod: 'cod' // Default to COD only
   });
   const [isProcessing, setIsProcessing] = useState(false);
@@ -149,7 +149,7 @@ const Checkout = ({ cart, calculateTotal, clearCart }) => {
             phone2: defaultAddress.phone2 || '', // Include phone2
             address: defaultAddress.address || '',
             city: defaultAddress.city || '',
-            country: defaultAddress.country || 'Pakistan',
+            country: defaultAddress.country || 'United Kingdom',
             paymentMethod: 'cod'
           });
         }
@@ -163,10 +163,13 @@ const Checkout = ({ cart, calculateTotal, clearCart }) => {
     loadUserAddresses();
   }, [user]);
 
-  const formatPrice = (price) => {
-    if (!price || isNaN(price)) return "Rs --";
-    return `Rs ${parseFloat(price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-  };
+const formatPrice = (price) => {
+  if (!price || isNaN(price)) return "£--";
+  return `£${parseFloat(price).toLocaleString('en-GB', { 
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2 
+  })}`;
+};
 
   const handleInputChange = (e) => {
     setFormData({
@@ -199,7 +202,7 @@ const Checkout = ({ cart, calculateTotal, clearCart }) => {
       phone2: address.phone2 || '',
       address: address.address || '',
       city: address.city || '',
-      country: address.country || 'Pakistan',
+      country: address.country || 'United Kingdom',
       paymentMethod: 'cod'
     });
   };
