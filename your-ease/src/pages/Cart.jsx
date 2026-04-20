@@ -149,10 +149,13 @@ const Cart = ({ cart, updateQuantity, removeFromCart, calculateTotal }) => {
     }, 0);
   };
 
-  const formatPrice = (price) => {
-    if (!price || isNaN(price)) return "Rs --";
-    return `Rs ${parseFloat(price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-  };
+const formatPrice = (price) => {
+  if (!price || isNaN(price)) return "£--";
+  return `£${parseFloat(price).toLocaleString('en-GB', { 
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2 
+  })}`;
+};
 
   const getTotalItems = () => {
     return localCart.reduce((total, item) => total + item.quantity, 0);
