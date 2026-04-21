@@ -87,19 +87,43 @@ const Contact = () => {
   const faqItems = [
     {
       question: "What are your business hours?",
-      answer: "We're available Monday to Sunday, 9:00 AM to 11:00 PM Pakistan Standard Time."
+      answer: "We're available Monday to Friday, 9:00 AM - 9:00 PM GMT, Saturday 10:00 AM - 8:00 PM GMT, and Sunday 11:00 AM - 6:00 PM GMT."
     },
     {
       question: "How long does shipping take?",
-      answer: "We offer FREE delivery all over Pakistan within 3-7 business days for standard delivery and 1-2 days for express delivery."
+      answer: "We offer FREE delivery all over the United Kingdom within 3-5 business days for standard delivery and 1-2 business days for express delivery."
     },
     {
       question: "Do you offer international shipping?",
-      answer: "Currently, we only ship within Pakistan. We're working on expanding our services internationally."
+      answer: "Currently, we only ship within the United Kingdom. We're working on expanding our services internationally in the near future."
     },
     {
       question: "What payment methods do you accept?",
-      answer: "We accept cash on delivery, bank transfers, credit/debit cards, and mobile payments."
+      answer: "We accept Cash on Delivery (COD), Credit/Debit Cards, Bank Transfers, Apple Pay, Google Pay, and PayPal."
+    },
+    {
+      question: "How can I track my order?",
+      answer: "Once your order is shipped, you'll receive a tracking number via email and SMS. You can use this to track your order on our website's Track Order page or directly through our delivery partner's website."
+    },
+    {
+      question: "What is your return policy?",
+      answer: "We offer a 14-day return policy on most products. Items must be unused, in original packaging, and returned within 14 days of delivery. Contact our support team to initiate a return."
+    },
+    {
+      question: "Do you offer wholesale or bulk discounts?",
+      answer: "Yes, we offer special pricing for bulk orders and wholesale customers. Please contact our sales team at gorbusinessltd096@gmail.com with your requirements."
+    },
+    {
+      question: "What if I receive a damaged or defective product?",
+      answer: "If you receive a damaged or defective product, please contact us within 48 hours of delivery with photos of the damage. We'll arrange a free replacement or full refund immediately."
+    },
+    {
+      question: "Can I change or cancel my order after placing it?",
+      answer: "Orders can be modified or cancelled within 2 hours of placement. After that, the order may have already been processed for shipping. Please contact us immediately if you need to make changes."
+    },
+    {
+      question: "Do you offer gift cards or vouchers?",
+      answer: "Yes, we offer digital gift cards in various denominations. They make perfect gifts and can be purchased directly from our website."
     }
   ];
 
@@ -159,9 +183,9 @@ const Contact = () => {
               
               <div className="space-y-3">
                 {[
-                  { day: 'Monday - Friday', hours: '9:00 AM - 11:00 PM' },
-                  { day: 'Saturday', hours: '10:00 AM - 11:00 PM' },
-                  { day: 'Sunday', hours: '10:00 AM - 10:00 PM' }
+                  { day: 'Monday - Friday', hours: '9:00 AM - 9:00 PM (GMT)' },
+                  { day: 'Saturday', hours: '10:00 AM - 8:00 PM (GMT)' },
+                  { day: 'Sunday', hours: '11:00 AM - 6:00 PM (GMT)' }
                 ].map((schedule, index) => (
                   <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
                     <span className="font-medium text-gray-900">{schedule.day}</span>
@@ -179,9 +203,9 @@ const Contact = () => {
 
             {/* FAQ Section */}
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Answers</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
               
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                 {faqItems.map((item, index) => (
                   <div key={index} className="border-b border-gray-100 pb-4 last:border-0">
                     <h3 className="font-semibold text-gray-900 mb-2">{item.question}</h3>
@@ -282,7 +306,7 @@ const Contact = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                      placeholder="+92 300 1234567"
+                      placeholder="+44 7478 034524"
                     />
                   </div>
 

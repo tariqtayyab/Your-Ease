@@ -11,7 +11,7 @@ const PolicyPage = () => {
       title: "Privacy Policy",
       content: `
         <h3 className="text-xl font-semibold mb-4">Your Privacy Matters</h3>
-        <p className="mb-4">At gorbusinessltd, we are committed to protecting your privacy and ensuring the security of your personal information.</p>
+        <p className="mb-4">At gorbusinessltd, we are committed to protecting your privacy and ensuring the security of your personal information in compliance with UK data protection laws including GDPR.</p>
         
         <h4 className="font-semibold mb-2">Information We Collect</h4>
         <ul className="list-disc list-inside mb-4 space-y-1">
@@ -30,94 +30,106 @@ const PolicyPage = () => {
         </ul>
 
         <h4 className="font-semibold mb-2">Data Protection</h4>
-        <p className="mb-4">We implement industry-standard security measures to protect your data from unauthorized access, alteration, or disclosure.</p>
+        <p className="mb-4">We implement industry-standard security measures to protect your data from unauthorized access, alteration, or disclosure. We comply with UK GDPR regulations.</p>
+
+        <h4 className="font-semibold mb-2">Your Rights</h4>
+        <ul className="list-disc list-inside mb-4 space-y-1">
+          <li>Right to access your personal data</li>
+          <li>Right to rectification of inaccurate data</li>
+          <li>Right to erasure (right to be forgotten)</li>
+          <li>Right to restrict or object to processing</li>
+          <li>Right to data portability</li>
+        </ul>
 
         <h4 className="font-semibold mb-2">Third-Party Services</h4>
-        <p>We may share necessary information with trusted third parties (payment processors, delivery partners) solely for order fulfillment purposes.</p>
+        <p>We may share necessary information with trusted third parties (payment processors, delivery partners like Royal Mail, Evri, DPD) solely for order fulfillment purposes.</p>
       `
     },
     terms: {
-  icon: <FiFileText className="w-6 h-6" />,
-  title: "Terms of Service",
-  content: `
-    <h3 className="text-xl font-semibold mb-4">Terms & Conditions</h3>
-    <p className="mb-4">By using gorbusinessltd, you agree to comply with and be bound by the following terms and conditions.</p>
-    
-    <h4 className="font-semibold mb-2">Account Registration</h4>
-    <ul className="list-disc list-inside mb-4 space-y-1">
-      <li>You must be at least 18 years old to create an account</li>
-      <li>Provide accurate and complete information during registration</li>
-      <li>Maintain the confidentiality of your account credentials</li>
-      <li>Notify us immediately of any unauthorized account activity</li>
-    </ul>
+      icon: <FiFileText className="w-6 h-6" />,
+      title: "Terms of Service",
+      content: `
+        <h3 className="text-xl font-semibold mb-4">Terms & Conditions</h3>
+        <p className="mb-4">By using gorbusinessltd, you agree to comply with and be bound by the following terms and conditions under UK law.</p>
+        
+        <h4 className="font-semibold mb-2">Account Registration</h4>
+        <ul className="list-disc list-inside mb-4 space-y-1">
+          <li>You must be at least 18 years old to create an account</li>
+          <li>Provide accurate and complete information during registration</li>
+          <li>Maintain the confidentiality of your account credentials</li>
+          <li>Notify us immediately of any unauthorized account activity</li>
+        </ul>
 
-    <h4 className="font-semibold mb-2">Order Acceptance & Completion</h4>
-    <ul className="list-disc list-inside mb-4 space-y-1">
-      <li>All orders are subject to product availability</li>
-      <li>Prices are subject to change without notice</li>
-      <li>Order confirmation does not constitute final acceptance</li>
-      <li>The transaction is considered complete upon successful delivery and receipt of the product by the customer</li>
-      <li>Ownership and risk of loss pass to you upon delivery confirmation</li>
-    </ul>
+        <h4 className="font-semibold mb-2">Order Acceptance & Completion</h4>
+        <ul className="list-disc list-inside mb-4 space-y-1">
+          <li>All orders are subject to product availability</li>
+          <li>Prices are subject to change without notice</li>
+          <li>Order confirmation does not constitute final acceptance</li>
+          <li>The transaction is considered complete upon successful delivery and receipt of the product by the customer</li>
+          <li>Ownership and risk of loss pass to you upon delivery confirmation</li>
+          <li>We comply with UK Consumer Rights Act 2015</li>
+        </ul>
 
-    <h4 className="font-semibold mb-2">User Responsibilities</h4>
-    <ul className="list-disc list-inside mb-4 space-y-1">
-      <li>Use the platform for lawful purposes only</li>
-      <li>Do not attempt to interfere with platform security</li>
-      <li>Provide accurate shipping and payment information</li>
-      <li>Respect intellectual property rights</li>
-    </ul>
+        <h4 className="font-semibold mb-2">User Responsibilities</h4>
+        <ul className="list-disc list-inside mb-4 space-y-1">
+          <li>Use the platform for lawful purposes only</li>
+          <li>Do not attempt to interfere with platform security</li>
+          <li>Provide accurate shipping and payment information</li>
+          <li>Respect intellectual property rights</li>
+        </ul>
 
-    <h4 className="font-semibold mb-2">Product Reviews & Content</h4>
-    <ul className="list-disc list-inside mb-4 space-y-1">
-      <li>We may display product reviews and ratings from various sources</li>
-      <li>Some reviews are imported from third-party platforms to provide comprehensive product information</li>
-      <li>We strive to ensure the accuracy of imported content but cannot guarantee its authenticity</li>
-      <li>Users may submit their own reviews which are subject to moderation and approval</li>
-    </ul>
+        <h4 className="font-semibold mb-2">Product Reviews & Content</h4>
+        <ul className="list-disc list-inside mb-4 space-y-1">
+          <li>We may display product reviews and ratings from various sources</li>
+          <li>Some reviews are imported from third-party platforms to provide comprehensive product information</li>
+          <li>We strive to ensure the accuracy of imported content but cannot guarantee its authenticity</li>
+          <li>Users may submit their own reviews which are subject to moderation and approval</li>
+        </ul>
 
-    <h4 className="font-semibold mb-2">Transaction Completion</h4>
-    <ul className="list-disc list-inside mb-4 space-y-1">
-      <li>The sales contract between you and gorbusinessltd is finalized upon product delivery</li>
-      <li>Delivery confirmation via tracking or customer acknowledgment completes the transaction</li>
-      <li>Post-delivery disputes are handled through our returns and refunds policy</li>
-      <li>Payment obligations are confirmed upon successful delivery</li>
-    </ul>
+        <h4 className="font-semibold mb-2">Transaction Completion</h4>
+        <ul className="list-disc list-inside mb-4 space-y-1">
+          <li>The sales contract between you and gorbusinessltd is finalized upon product delivery</li>
+          <li>Delivery confirmation via tracking or customer acknowledgment completes the transaction</li>
+          <li>Post-delivery disputes are handled through our returns and refunds policy</li>
+          <li>Payment obligations are confirmed upon successful delivery</li>
+        </ul>
 
-    <h4 className="font-semibold mb-2">Modifications</h4>
-    <p>We reserve the right to modify these terms at any time. Continued use of the platform constitutes acceptance of modified terms.</p>
-  `
-},
+        <h4 className="font-semibold mb-2">Modifications</h4>
+        <p>We reserve the right to modify these terms at any time. Continued use of the platform constitutes acceptance of modified terms.</p>
+      `
+    },
     shipping: {
       icon: <FiTruck className="w-6 h-6" />,
       title: "Shipping Policy",
       content: `
         <h3 className="text-xl font-semibold mb-4">Shipping Information</h3>
-        <p className="mb-4">We offer free delivery across Pakistan with reliable and trackable shipping services.</p>
+        <p className="mb-4">We offer free delivery across the United Kingdom with reliable and trackable shipping services through Royal Mail, Evri, and DPD.</p>
         
         <h4 className="font-semibold mb-2">Delivery Areas</h4>
         <ul className="list-disc list-inside mb-4 space-y-1">
-          <li>We deliver to all major cities and towns across Pakistan</li>
-          <li>Free shipping nationwide with no minimum order value</li>
-          <li>Remote areas may require additional delivery time</li>
+          <li>We deliver to all major cities and towns across England, Scotland, Wales, and Northern Ireland</li>
+          <li>Free standard shipping nationwide with no minimum order value</li>
+          <li>Remote areas including Highlands and Islands may require additional delivery time</li>
+          <li>Some remote postcodes may not be eligible for express delivery</li>
         </ul>
 
         <h4 className="font-semibold mb-2">Delivery Timeframes</h4>
         <ul className="list-disc list-inside mb-4 space-y-1">
-          <li><strong>Standard Delivery:</strong> 3-7 business days</li>
+          <li><strong>Standard Delivery:</strong> 3-5 business days</li>
           <li><strong>Express Delivery:</strong> 1-2 business days (major cities)</li>
-          <li>Delivery times may vary during holidays or adverse weather conditions</li>
+          <li>Delivery times may vary during holidays, adverse weather conditions, or Royal Mail strikes</li>
         </ul>
 
         <h4 className="font-semibold mb-2">Order Processing</h4>
         <ul className="list-disc list-inside mb-4 space-y-1">
-          <li>Orders are processed within 24 hours on business days</li>
-          <li>You will receive tracking information once your order is shipped</li>
+          <li>Orders are processed within 24 hours on business days (Monday-Friday)</li>
+          <li>You will receive tracking information via email and SMS once your order is shipped</li>
           <li>Someone must be available at the delivery address to receive packages</li>
+          <li>If you're not home, the courier will leave a card or attempt delivery with a neighbor</li>
         </ul>
 
         <h4 className="font-semibold mb-2">Shipping Charges</h4>
-        <p>All shipping charges are FREE across Pakistan. No hidden fees or additional costs.</p>
+        <p>Standard shipping is FREE across the United Kingdom. Express delivery is available for £4.99. No hidden fees or additional costs.</p>
       `
     },
     returns: {
@@ -125,71 +137,51 @@ const PolicyPage = () => {
       title: "Return & Refund Policy",
       content: `
         <h3 className="text-xl font-semibold mb-4">Returns & Refunds</h3>
-        <p className="mb-4">We strive to ensure your complete satisfaction with every purchase.</p>
+        <p className="mb-4">We strive to ensure your complete satisfaction with every purchase. Our returns policy complies with UK Consumer Rights Act 2015.</p>
         
         <h4 className="font-semibold mb-2">Return Policy</h4>
         <ul className="list-disc list-inside mb-4 space-y-1">
-          <li>14-day return policy from delivery date</li>
+          <li><strong>14-day return policy</strong> from delivery date for most products</li>
+          <li><strong>30-day return policy</strong> for faulty or defective items (Consumer Rights Act 2015)</li>
           <li>Items must be in original condition with tags and packaging</li>
-          <li>Return shipping is free for defective or incorrect items</li>
-          <li>Some items are non-returnable for hygiene reasons</li>
+          <li>Return shipping is free for defective, incorrect, or faulty items</li>
+          <li>Customer is responsible for return shipping costs for change of mind returns</li>
         </ul>
 
         <h4 className="font-semibold mb-2">Refund Process</h4>
         <ul className="list-disc list-inside mb-4 space-y-1">
           <li>Full product price refund for eligible returns</li>
-          <li>Original shipping charges are non-refundable</li>
-          <li>Refunds processed within 3-5 business days after return receipt</li>
+          <li>Original shipping charges are non-refundable for change of mind returns</li>
+          <li>Refunds processed within 14 days of receiving the returned item</li>
           <li>Refund method matches original payment method</li>
+          <li>You will receive email confirmation once refund is processed</li>
         </ul>
 
         <h4 className="font-semibold mb-2">Non-Returnable Items</h4>
         <ul className="list-disc list-inside mb-4 space-y-1">
           <li>Personal care and hygiene products</li>
-          <li>Underwear and intimate apparel</li>
-          <li>Software and digital products</li>
+          <li>Underwear and intimate apparel (for hygiene reasons)</li>
+          <li>Software and digital products once downloaded</li>
           <li>Personalized or custom-made items</li>
+          <li>Perishable goods</li>
         </ul>
 
-        <h4 className="font-semibold mb-2">Warranty Claims</h4>
-        <p>Manufacturer warranty claims are processed through authorized service centers. Contact support for assistance.</p>
+        <h4 className="font-semibold mb-2">Damaged or Faulty Items</h4>
+        <ul className="list-disc list-inside mb-4 space-y-1">
+          <li>Contact us within 48 hours of delivery with photos of the damage</li>
+          <li>We will arrange a free replacement or full refund immediately</li>
+          <li>Return shipping costs covered by us</li>
+        </ul>
+
+        <h4 className="font-semibold mb-2">How to Initiate a Return</h4>
+        <ul className="list-disc list-inside mb-4 space-y-1">
+          <li>Contact our support team at gorbusinessltd096@gmail.com</li>
+          <li>Provide your order number and reason for return</li>
+          <li>Include photos if item is damaged or defective</li>
+          <li>Wait for return authorization and instructions</li>
+        </ul>
       `
-    },
-    // payment: {
-    //   icon: <FiCreditCard className="w-6 h-6" />,
-    //   title: "Payment Policy",
-    //   content: `
-    //     <h3 className="text-xl font-semibold mb-4">Payment Methods & Security</h3>
-    //     <p className="mb-4">We offer multiple secure payment options for your convenience.</p>
-        
-    //     <h4 className="font-semibold mb-2">Accepted Payment Methods</h4>
-    //     <ul className="list-disc list-inside mb-4 space-y-1">
-    //       <li>Cash on Delivery (COD)</li>
-    //       <li>Credit/Debit Cards (Visa, MasterCard)</li>
-    //       <li>Bank Transfers</li>
-    //       <li>Mobile Payments</li>
-    //       <li>Digital Wallets</li>
-    //     </ul>
-
-    //     <h4 className="font-semibold mb-2">Payment Security</h4>
-    //     <ul className="list-disc list-inside mb-4 space-y-1">
-    //       <li>All payments are processed through secure, encrypted channels</li>
-    //       <li>We do not store your complete payment card information</li>
-    //       <li>PCI DSS compliant payment processing</li>
-    //       <li>Secure SSL encryption for all transactions</li>
-    //     </ul>
-
-    //     <h4 className="font-semibold mb-2">Order Verification</h4>
-    //     <ul className="list-disc list-inside mb-4 space-y-1">
-    //       <li>Orders may require additional verification for security</li>
-    //       <li>We may contact you to confirm order details</li>
-    //       <li>Suspicious transactions may be held for review</li>
-    //     </ul>
-
-    //     <h4 className="font-semibold mb-2">Currency & Pricing</h4>
-    //     <p>All prices are in Pakistani Rupees (PKR). We reserve the right to correct pricing errors that may occur.</p>
-    //   `
-    // }
+    }
   };
 
   return (
@@ -204,7 +196,7 @@ const PolicyPage = () => {
             Policies & Terms
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Understanding our policies helps ensure a smooth and secure shopping experience.
+            Understanding our policies helps ensure a smooth and secure shopping experience in the United Kingdom.
           </p>
         </div>
 
@@ -240,9 +232,6 @@ const PolicyPage = () => {
                   <Link to="/faq" className="block text-sm text-teal-600 hover:text-teal-700">
                     FAQ Section
                   </Link>
-                  <Link to="/support" className="block text-sm text-teal-600 hover:text-teal-700">
-                    Customer Support
-                  </Link>
                 </div>
               </div>
             </div>
@@ -268,7 +257,7 @@ const PolicyPage = () => {
               {/* Last Updated */}
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <p className="text-sm text-gray-500">
-                  <strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { 
+                  <strong>Last Updated:</strong> {new Date().toLocaleDateString('en-GB', { 
                     year: 'numeric', 
                     month: 'long', 
                     day: 'numeric' 

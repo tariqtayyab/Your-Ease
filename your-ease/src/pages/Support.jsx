@@ -62,7 +62,7 @@ const Support = () => {
       icon: Phone,
       title: "Phone Support",
       description: "Call us for immediate assistance",
-      details: "+92 325 8211422",
+      details: "+44 7478 034524",
       action: "tel:+447478034524",
       color: "teal"
     },
@@ -78,15 +78,15 @@ const Support = () => {
       icon: Mail,
       title: "Email Support",
       description: "Send us an email",
-      details: "team.gorbusinessltd096@gmail.com",
-      action: "mailto:team.gorbusinessltd096@gmail.com",
+      details: "gorbusinessltd096@gmail.com",
+      action: "mailto:gorbusinessltd096@gmail.com",
       color: "blue"
     },
     {
       icon: Clock,
       title: "Business Hours",
       description: "Our support availability",
-      details: "Mon-Sun: 9AM - 11PM",
+      details: "Mon-Sun: 9AM - 9PM (GMT)",
       action: null,
       color: "purple"
     }
@@ -95,7 +95,7 @@ const Support = () => {
   const commonIssues = [
     {
       title: "Order Tracking",
-      description: "Track your order status and delivery",
+      description: "Track your order status and delivery across the UK",
       link: "/track-order"
     },
     {
@@ -103,6 +103,16 @@ const Support = () => {
       description: "Initiate returns and check refund status",
       link: "/returns"
     },
+    {
+      title: "Shipping Information",
+      description: "Learn about our free UK delivery options",
+      link: "/shipping"
+    },
+    {
+      title: "Account Help",
+      description: "Manage your account and profile settings",
+      link: "/profile"
+    }
   ];
 
   return (
@@ -117,7 +127,7 @@ const Support = () => {
             Customer Support
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            We're here to help you. Get in touch with our support team through multiple channels.
+            We're here to help you. Get in touch with our UK-based support team through multiple channels.
           </p>
         </div>
 
@@ -257,7 +267,7 @@ const Support = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                      placeholder="+92 300 1234567"
+                      placeholder="+44 7478 034524"
                     />
                   </div>
 

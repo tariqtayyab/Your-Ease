@@ -1383,7 +1383,7 @@ const formatPrice = (price) => {
                   )}
                 </div>
 
-                <button 
+                {/* <button 
                   onClick={handleWhatsAppOrder}
                   disabled={product.countInStock === 0}
                   className={`w-full py-4 px-6 rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-3 text-base sm:text-lg ${
@@ -1394,7 +1394,8 @@ const formatPrice = (price) => {
                 >
                   <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                   Order on WhatsApp
-                </button>
+                </button> */}
+             
               </div>
 
               {/* Success Messages */}
